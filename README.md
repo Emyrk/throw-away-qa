@@ -18,7 +18,7 @@ python3 scripts/build_site.py
 python3 -m http.server 8000 --directory web
 ```
 
-Open the local port 8000 through your Coder workspace app or browser. The page is read-only. It shows cases, configuration, timers, and committed results from generated `web/data.json`. That generated file is not a second source of truth; `cases/` and `runs/` are. The GitHub Pages workflow can publish the same static page from `main` after Pages is enabled for GitHub Actions in repository settings. Check the displayed source revision before trusting a stale browser tab.
+Open the local port 8000 through your Coder workspace app or browser. The page is read-only. It shows cases, configuration, timers, and committed results from generated `web/data.json`. That generated file is not a second source of truth; `cases/` and `runs/` are. The GitHub Pages workflow publishes the same static page from `main` **after the repository owner enables Pages in Settings > Pages and selects GitHub Actions as the build source**. Until then it validates and builds the site but skips deployment with a warning. After enabling, rerun the workflow or commit another result. This agent's GitHub integration cannot enable Pages itself. Check the displayed source revision before trusting a stale browser tab.
 
 ## Record a result
 
