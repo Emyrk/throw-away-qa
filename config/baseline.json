@@ -1,0 +1,27 @@
+{
+  "status": "CANDIDATE_NOT_DEPLOYED",
+  "source_revision": "coder/agent-relay origin/main 23e85405e923e153baf2eb2ecab5576b3690c273",
+  "apply_policy": "Jointly review and resolve prerequisites; apply only to a dedicated QA relay in organization steven. Never overwrite production deployment, queues, pools, templates or secrets. Restart the QA relay after one overlay at a time and record its redacted config hash.",
+  "unresolved": ["Confirm separate QA relay and both provider entitlements/credentials", "Confirm provisioner name, tags, host, socket access, shared-host isolation, concurrency and capacity", "Confirm coderd build-secret capability and template/module compatibility", "Confirm QA template slug and exact active version UUIDs", "Confirm status UI private access and org-wide reader permission"],
+  "secret_environment_variable_names_only": ["CODER_AGENT_RELAY_CODERD_SESSION_TOKEN", "QA_CLAUDE_POOL_SECRET", "QA_CURSOR_SERVICE_ACCOUNT_KEY"],
+  "config": {
+    "coderdURL": "https://dogfood.cdr.dev",
+    "logLevel": "info",
+    "logFormat": "json",
+    "prometheusEnable": true,
+    "prometheusAddress": "0.0.0.0:2112",
+    "statusUIEnable": true,
+    "statusUIAddress": "0.0.0.0:2113",
+    "statusUIAuth": "coder-token",
+    "reapKeepaliveRefreshBefore": "35m",
+    "reapKeepaliveBumpBy": "10m",
+    "reapDelay": "0s",
+    "cursorRelistInterval": "5m",
+    "cursorRelistJitter": "0s",
+    "claudeCodeRunnerPools": [{"name": "qa-claude", "secret_env": "QA_CLAUDE_POOL_SECRET", "organization": "steven", "template": "agent-relay-qa-docker", "template_parameters": {"cpu": "2", "memory": "4", "self_hosted_provider": "claude", "forced_failure_mode": "none"}, "idle_release_timeout": "10m"}],
+    "cursorWorkerPools": [{"name": "qa-cursor", "secret_env": "QA_CURSOR_SERVICE_ACCOUNT_KEY", "cursor_pool_name": "coder-agent-relay-qa", "organization": "steven", "template": "agent-relay-qa-docker", "template_parameters": {"cpu": "2", "memory": "4", "self_hosted_provider": "cursor", "forced_failure_mode": "none"}, "dispatch_deadline": "10m", "idle_release_timeout": "10m"}]
+  },
+  "docker_provider": {"host": "unix:///var/run/docker.sock", "runner_socket_mount": false, "status": "candidate local provisioner socket; privileged, verify provisioner process permissions and host isolation before use"},
+  "listener_policy": "0.0.0.0 is acceptable only on a private network with controlled local port-forward. Do not publicly expose 2113 without TLS and authenticated access. Probe /readyz and /metrics via a private forward to the QA pod, even when Kubernetes marks the pod not ready. Authenticate status UI through /login; do not assume /api/status accepts a token header.",
+  "public_evidence_policy": "Store only redacted IDs, UTC timestamps, hashes, status/build metadata, sanitized counters and summarized observations. No secrets, emails, raw provider transcripts, work orders, debug logs or credential-bearing state."
+}

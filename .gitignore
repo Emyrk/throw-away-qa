@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfvars
+*.tfvars.json
+web/data.json
+node_modules/
+.env
+.env.*
