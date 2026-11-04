@@ -8,6 +8,14 @@ QA runs use the `steven` organization and its Docker-capable provisioner. `templ
 
 The cases cover the 36 PR merges on `coder/agent-relay` main in the rolling window 2026-10-05 17:20 UTC to 2026-11-04 17:20 UTC, grouped into ten workflows. Refresh the history and case coverage as new changes merge. Negative and fault-injection tests must target only QA resources and require explicit permission.
 
+## Run the QA relay in a tester workspace
+
+Build from a pinned `coder/agent-relay` source revision, not from the older dogfood image. In this workspace, the local QA binary is built from `23e85405e923e153baf2eb2ecab5576b3690c273` at `~/.local/bin/agent-relay-qa`. Run `python3 scripts/prepare-relay-config.py` once to render `~/.config/agent-relay-qa/config.yaml` (mode 0600) from `config/baseline.json`. The renderer refuses to overwrite a local overlay and rejects an inline pool secret. Its listeners use loopback ports **22112** (metrics and `/readyz`) and **22113** (token-authenticated status page), because 2112 and 2113 are occupied in this workspace. The config file is JSON syntax accepted as YAML by the relay and contains no credentials.
+
+Before starting, confirm `qa-claude` and Cursor's `coder-agent-relay-qa` are distinct, QA-only provider queues, and verify that the relay service account belongs to `steven` with the required permissions. Make these **three** values available as environment variables to the Relay process: `CODER_AGENT_RELAY_CODERD_SESSION_TOKEN`, `QA_CLAUDE_POOL_SECRET`, and `QA_CURSOR_SERVICE_ACCOUNT_KEY`. This workspace has a private, mode-0600 skeleton at `~/.config/agent-relay-qa/secrets.env`; fill its shell assignments in a workspace editor, **not in chat or Git**. The start script checks ownership and mode before loading it, and also accepts securely injected environment variables. The Coder token must be a dedicated relay service-account token, not the interactive workspace `CODER_SESSION_TOKEN`. No secret values are printed or written by the scripts. Do not enable dangerous parameter credential transport.
+
+When the QA-only queues and credentials are confirmed, set `AGENT_RELAY_QA_POOLS_CONFIRMED=yes` in the Relay process environment and run `sh scripts/run-relay.sh`. It writes logs to the private workspace path `~/.config/agent-relay-qa/relay.log`, not to this public repo. Run `sh scripts/check-relay.sh` to inspect `/readyz`, labeled pool health and status listener liveness. Readiness 200 means **at least one** pool is healthy, so check both labeled pool gauges. For the status UI, use a separate short-lived Coder reader token with workspace-read access; do not sign in with the Relay service-account token or the workspace's existing interactive session token. Do not copy raw logs or credential-bearing API output into public result evidence. The relay is not started automatically by the suite.
+
 ## View the suite
 
 With Python 3.10+:
