@@ -66,6 +66,7 @@ h1 em { color: #167e78; font-style: normal; }
 .case-item-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .case-id { color: #168179; font-size: 11px; font-weight: 800; letter-spacing: .11em; }
 .case-title { font-size: 14px; font-weight: 750; line-height: 1.35; }
+.case-summary { color: #526970; font-size: 12px; line-height: 1.5; }
 .case-meta { color: #708086; font-size: 11px; line-height: 1.4; }
 .badge { display: inline-flex; align-items: center; flex: none; width: fit-content; padding: 5px 8px; border-radius: 5px; font-size: 10px; font-weight: 800; line-height: 1.2; white-space: nowrap; }
 .badge-pass { color: #166d4b; background: #e1f4e9; }
@@ -83,7 +84,8 @@ h1 em { color: #167e78; font-style: normal; }
 .detail-empty h2 { margin: 15px 0 0; color: #21343c; }
 .detail-empty p { margin: 8px 0 0; }
 .detail-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.detail-header h2 { margin: 14px 0 18px; font-size: clamp(28px, 3vw, 41px); line-height: 1.17; letter-spacing: -.04em; }
+.detail-header h2 { margin: 14px 0 10px; font-size: clamp(28px, 3vw, 41px); line-height: 1.17; letter-spacing: -.04em; }
+.case-description { margin: 0 0 18px; max-width: 70ch; color: #526970; font-size: 14px; line-height: 1.55; }
 .coverage-note { margin: 13px 0 0; color: #647780; font-size: 12px; }
 .pills { display: flex; flex-wrap: wrap; gap: 7px; }
 .pill { padding: 7px 10px; border: 1px solid #dfe8e4; border-radius: 6px; background: #f8faf9; color: #49616a; font-size: 11px; font-weight: 700; }
@@ -98,6 +100,7 @@ h1 em { color: #167e78; font-style: normal; }
 .variant { padding: 22px; margin-top: 16px; border: 1px solid #dfe8e4; border-radius: 12px; }
 .variant-heading { display: flex; justify-content: space-between; align-items: start; gap: 16px; }
 .variant-heading h4 { margin: 7px 0 9px; font-size: 18px; letter-spacing: -.025em; }
+.variant-summary { max-width: 68ch; margin: 0 0 10px; color: #526970; font-size: 13px; line-height: 1.55; }
 .button { padding: 9px 12px; border-radius: 7px; border: 1px solid transparent; font-size: 11px; font-weight: 800; line-height: 1.25; }
 .button-outline { color: #15796e; background: #f3faf7; border-color: #cce7dd; }
 .button-outline:hover:not(:disabled) { background: #e5f5ee; }

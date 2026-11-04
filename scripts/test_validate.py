@@ -11,9 +11,9 @@ import validate
 
 
 CASE = {
-    "id": "Q01", "title": "Smoke", "providers": ["cursor"], "priority": "P0",
+    "id": "Q01", "title": "Smoke", "summary": "Confirms a healthy QA runner can answer a test request.", "providers": ["cursor"], "priority": "P0",
     "prs": [96], "estimated_minutes": 15, "prerequisites": [], "config": {}, "notes": [],
-    "variants": [{"id": "Q01-a", "title": "Run", "cleanup": ["Delete QA workspace"], "steps": [
+    "variants": [{"id": "Q01-a", "title": "Run", "summary": "Checks that a workspace becomes ready within the expected window.", "cleanup": ["Delete QA workspace"], "steps": [
         {"action": "Start", "wait_seconds": 0, "poll_seconds": 10, "timeout_seconds": 60,
          "expected": "Ready", "evidence": "Record status"}
     ]}],
@@ -55,6 +55,22 @@ class ValidationTests(unittest.TestCase):
         cases, runs = validate.collect()
         self.assertEqual("Q01", cases[0]["id"])
         self.assertEqual("pass", runs[0]["results"][0]["status"])
+
+    def test_missing_summary_rejected(self):
+        path = self.root / "cases" / "Q01.json"
+        case = json.loads(path.read_text())
+        del case["summary"]
+        self.write(path, case)
+        with self.assertRaisesRegex(validate.Invalid, "summary must be a short"):
+            validate.collect()
+
+    def test_variant_summary_rejected_when_over_two_sentences(self):
+        path = self.root / "cases" / "Q01.json"
+        case = json.loads(path.read_text())
+        case["variants"][0]["summary"] = "One test. Another test. A third test."
+        self.write(path, case)
+        with self.assertRaisesRegex(validate.Invalid, "one or two complete sentences"):
+            validate.collect()
 
     def test_unobserved_result_rejected(self):
         path = self.run / "Q01-a.json"

@@ -42,6 +42,13 @@ def check_public(path, text):
     require(not SECRET.search(text), f"possible secret or email in {path}; redact before committing")
 
 
+def validate_summary(value, path):
+    require(isinstance(value, str) and 20 <= len(value.strip()) <= 320, f"{path}: summary must be a short, nonempty string")
+    sentences = re.split(r"(?<=[.!?])\s+", value.strip())
+    require(1 <= len(sentences) <= 2 and all(sentence.endswith((".", "!", "?")) for sentence in sentences),
+            f"{path}: summary must be one or two complete sentences")
+
+
 def validate_case(path):
     case, text = load_json(path)
     check_public(path, text)
@@ -49,6 +56,7 @@ def validate_case(path):
     require(case.get("id") == path.stem and re.fullmatch(r"Q\d{2}", path.stem), f"{path}: case ID must match filename")
     for field in ("title", "priority"):
         require(isinstance(case.get(field), str) and case[field], f"{path}: missing {field}")
+    validate_summary(case.get("summary"), f"{path}: case")
     require(case["priority"] in {"P0", "P1", "P2"}, f"{path}: invalid priority")
     for field in ("providers", "prs", "prerequisites", "notes"):
         require(isinstance(case.get(field), list), f"{path}: {field} must be a list")
@@ -64,6 +72,7 @@ def validate_case(path):
         require(isinstance(vid, str) and vid.startswith(path.stem + "-") and vid not in seen, f"{path}: invalid or repeated variant ID")
         seen.add(vid)
         require(isinstance(variant.get("title"), str) and variant["title"], f"{path}: missing variant title")
+        validate_summary(variant.get("summary"), f"{path}: {vid}")
         require(isinstance(variant.get("cleanup"), list), f"{path}: variant cleanup must be a list")
         steps = variant.get("steps")
         require(isinstance(steps, list) and steps, f"{path}: variant must have steps")

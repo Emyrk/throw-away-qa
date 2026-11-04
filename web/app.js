@@ -126,7 +126,7 @@ function filteredCases() {
   return state.cases.filter((testCase) => {
     if (state.provider && !values(testCase.providers).includes(state.provider)) return false;
     if (state.pr && !values(testCase.prs).includes(state.pr)) return false;
-    const searchable = [testCase.id, testCase.title, testCase.notes, ...values(testCase.providers), ...values(testCase.prs)]
+    const searchable = [testCase.id, testCase.title, testCase.summary, testCase.notes, ...values(testCase.providers), ...values(testCase.prs)]
       .map(valueText).join(" ").toLocaleLowerCase();
     return searchable.includes(state.search);
   });
@@ -170,6 +170,7 @@ function renderList() {
     const upper = node("span", "case-item-top");
     upper.append(node("span", "case-id", valueText(testCase.id)), caseBadge(testCase));
     button.append(upper, node("span", "case-title", valueText(testCase.title)));
+    if (testCase.summary) button.append(node("span", "case-summary", testCase.summary));
     const meta = node("span", "case-meta", `${values(testCase.providers).join(" · ") || "No provider"}  /  ${values(testCase.prs).map((pr) => `PR ${pr}`).join(", ") || "No PR"}`);
     button.append(meta);
     button.addEventListener("click", () => { state.selectedCase = testCase; renderList(); renderDetail(); });
@@ -192,6 +193,7 @@ function renderOverview(testCase) {
   const top = node("div", "detail-top");
   top.append(node("span", "eyebrow", `CASE ${valueText(testCase.id)}`), caseBadge(testCase));
   header.append(top, node("h2", "", valueText(testCase.title)));
+  if (testCase.summary) header.append(node("p", "case-description", testCase.summary));
   const pills = node("div", "pills");
   renderPills(pills, testCase.providers, "");
   renderPills(pills, testCase.prs, "PR ");
@@ -283,7 +285,9 @@ function renderTimer(container, testCase, variant, step, index) {
 function agentInstructions(testCase, variant) {
   const lines = [
     `Case ${valueText(testCase.id)}: ${valueText(testCase.title)}`,
+    `Summary: ${valueText(testCase.summary)}`,
     `Variant ${valueText(variant.id)}: ${valueText(variant.title)}`,
+    `Variant summary: ${valueText(variant.summary)}`,
     `Providers: ${values(testCase.providers).join(", ") || "-"}`,
     `Prerequisites:\n${listText(testCase.prerequisites)}`,
     `Baseline configuration: ${valueText(testCase.config?.baseline)}`,
@@ -327,6 +331,7 @@ function renderVariants(testCase) {
     const heading = node("div", "variant-heading");
     const name = node("div");
     name.append(node("p", "eyebrow", `VARIANT ${valueText(variant.id)}`), node("h4", "", valueText(variant.title)));
+    if (variant.summary) name.append(node("p", "variant-summary", variant.summary));
     if (state.run !== "") name.append(badge(variantStatus(runResults(testCase, chosenRuns()[0]), variant)));
     else {
       const count = state.runs.filter((run) => variantStatus(runResults(testCase, run), variant)).length;
