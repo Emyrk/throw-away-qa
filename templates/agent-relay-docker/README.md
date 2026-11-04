@@ -16,19 +16,12 @@ The selected 1.0.0 runner modules declare their own session parameters. `.terraf
 
 The agent publishes `agent_relay_status` every 10 seconds and `agent_relay_session_attached` every 30 seconds from the selected module's scripts. The relay uses the first for reaping and fresh `attached` samples from the second for keepalive. The image must have the selected provider CLI. The default image has both.
 
-## Publishing checklist (not performed here)
+## Publishing checklist
 
-1. Use the intended Coder deployment and organization `steven`. Confirm that the already-running provisioner with key `steven-home` has access to the local Docker socket and is the provisioner expected to claim these jobs. The template source cannot select a provisioner by its key: job matching uses provisioner tags. If other provisioners share the same matching tags, they may also claim jobs.
-2. Publish only this directory as the template source. For example, from the repository root, after checking the target deployment and available provisioners:
+The template was first published in `steven` on 2026-11-04 from source commit `73079d4`. Its initial active version ID was `2267ce10-44a7-4cc4-a209-4fd7d088b60f`; `allow_user_cancel_workspace_jobs=true`, `require_active_version=false` and default TTL `16h` were verified. These are a snapshot, not an assertion that the live deployment remains unchanged.
 
-   ```sh
-   coder templates push --org steven --directory templates/agent-relay-docker \
-     --provisioner-tag 'owner=' --provisioner-tag 'scope=organization' \
-     agent-relay-qa-docker
-   ```
-
-   The two tags select organization-scoped provisioner jobs, not a remote Docker endpoint. On an existing template, explicitly passing both avoids inheriting different tags from its active version. The QA template name is `agent-relay-qa-docker`; do not push this source to a production template.
-3. Enable `allow_user_cancel_workspace_jobs` on the template. This is a Coder template setting, not a Terraform setting. Verify it before configuring Agent Relay pools; the relay checks it. Confirm access for the relay service account and set each pool's `organization` to `steven`, `template` to the published name, and `template_parameters.self_hosted_provider` to `claude` or `cursor` respectively. Do not store provider secrets in this public repository.
-4. Verify the template's provisioner tags and an actual build in the deployment before routing live QA traffic. `terraform validate` checks syntax and module wiring but cannot prove the provisioner, Docker daemon, Coder version, image availability, or relay pool configuration are correct.
+1. For subsequent updates, run `scripts/publish-template.sh` from a clean `main` checkout after verifying the deployment and the `steven-home` provisioner. The script publishes only the `steven` template with the `owner=` and `scope=organization` tags, then reapplies cancellation, active-version and TTL settings. It does not select `steven-home` by key, so another provisioner with the same matching tags could claim jobs.
+2. Verify the template version, tags and an actual build before routing live QA traffic. `terraform validate` checks syntax and module wiring but cannot prove the provisioner, Docker daemon, Coder version, image availability or relay pool configuration are correct.
+3. Grant the relay service account appropriate access and set each QA pool's `organization` to `steven`, `template` to `agent-relay-qa-docker`, and `template_parameters.self_hosted_provider` to `claude` or `cursor` respectively. Do not store provider secrets in this public repository.
 
 `terraform_build` intentionally reports an error after creating the container. `coder_agent_connection` uses an invalid agent token. `anthropic_agent_execution` replaces the CLI with `/bin/false`. These failure controls should be used only for disposable QA sessions.
