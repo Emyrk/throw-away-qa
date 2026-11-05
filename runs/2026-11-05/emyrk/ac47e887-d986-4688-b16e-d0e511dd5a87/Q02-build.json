@@ -1,0 +1,31 @@
+{
+  "case_id": "Q02",
+  "variant_id": "Q02-build",
+  "status": "pass",
+  "observed_at": "2026-11-05T15:23:30Z",
+  "observations": [
+    "Only the QA Cursor pool used forced_failure_mode=terraform_build. One QA request was claimed at 15:12:18 UTC; its build failed as injected at 15:12:28 UTC after a workspace was created.",
+    "The Relay sent Cursor a retryable failure notification and the applied=true metric increased to one. The tester supplied a screenshot showing a clear 'agent-relay: workspace build failed. Try again in a few minutes.' message, with no credential or internal traceback visible.",
+    "Screenshot capture metadata recorded 15:12:44 UTC, within this fault window, and the displayed suffix matches the Relay's sent message. The instructed prompt marker is not visible in the Relay logs or screenshot, so correlation uses this unique claim, timing and message rather than claiming a verified prompt marker.",
+    "The disposable workspace was gone by 15:12:55 UTC. The original config was restored byte-for-byte and both QA pools were healthy again at 15:13:39 UTC. No manual deletion was required."
+  ],
+  "events": [
+    {"at":"2026-11-05T15:12:18.108594696Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"relay_log","kind":"request_received","time_basis":"event","step":1,"subject":"cursor-build-a","summary":"One request arrived in the QA Cursor pool while the scoped terraform_build fault was active."},
+    {"at":"2026-11-05T15:12:18.432536538Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"relay_log","kind":"request_claimed","time_basis":"event","step":1,"subject":"cursor-build-a","summary":"The QA Cursor pool claimed the pending request."},
+    {"at":"2026-11-05T15:12:22.350887516Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"relay_log","kind":"workspace_build_created","time_basis":"event","step":1,"subject":"cursor-build-a","summary":"Relay created the disposable QA workspace build using the faulted template parameter."},
+    {"at":"2026-11-05T15:12:28.396583372Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"relay_log","kind":"workspace_build_failed","time_basis":"event","step":1,"subject":"cursor-build-a","summary":"Terraform intentionally failed after container creation; Relay classified the failed build as retryable."},
+    {"at":"2026-11-05T15:12:28.732637845Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"relay_log","kind":"failure_notification_sent","time_basis":"event","step":2,"subject":"cursor-build-a","summary":"Cursor accepted the retryable fail-claim notification; the user-facing turn was no longer waiting."},
+    {"at":"2026-11-05T15:12:28.978020462Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"relay_log","kind":"workspace_deletion_queued","time_basis":"event","subject":"cursor-build-a","summary":"Relay queued deletion of the failed disposable QA workspace."},
+    {"at":"2026-11-05T15:12:38Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"coder_api","kind":"deletion_in_progress","time_basis":"observation","subject":"cursor-build-a","summary":"Coder listed the QA workspace with a running delete build."},
+    {"at":"2026-11-05T15:12:38Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"metrics","kind":"claim_failure_sample","time_basis":"observation","step":2,"subject":"cursor-build-a","summary":"Cursor claim-fail counter was one for applied=true and retryable=true; dispatcher recorded one failed build."},
+    {"at":"2026-11-05T15:12:44Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"tester","kind":"error_screenshot_captured","time_basis":"event","step":2,"subject":"cursor-build-a","summary":"Original screenshot creation metadata recorded this UTC capture time; it shows the retryable workspace-build error. Actual first display time may be earlier."},
+    {"at":"2026-11-05T15:12:55Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"coder_api","kind":"cleanup_verified","time_basis":"observation","subject":"cursor-build-a","summary":"Coder listed zero QA workspaces after the Relay-initiated delete."},
+    {"at":"2026-11-05T15:15:09Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"tester","kind":"error_screenshot_supplied","time_basis":"confirmation","step":2,"subject":"cursor-build-a","summary":"Tester supplied the screenshot of the Cursor error banner; this is not the time the error first appeared."},
+    {"at":"2026-11-05T15:22:45Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"operator","kind":"message_correlated","time_basis":"observation","step":2,"subject":"cursor-build-a","summary":"The screenshot's error text ends with the exact safe message that Relay sent during the one scoped fault claim."},
+    {"at":"2026-11-05T15:23:30Z","recorded_at":"2026-11-05T15:24:16.881971836Z","source":"operator","kind":"screenshot_reviewed","time_basis":"observation","step":2,"subject":"cursor-build-a","summary":"Original and metadata-stripped PNG were visually reviewed and compared pixel-for-pixel; no sensitive content was visible."}
+  ],
+  "evidence": ["evidence/Q02-build-error.png", "report.md"],
+  "screenshot_original_sha256": "58d55cee6bbed383323e12bb96fb81c1eb01f823d9ecd988e1f6d86d9b245ab4",
+  "screenshot_public_sha256": "a9b5238a9675da034042cc34232cbac4c4a1404f3bc55158290a3117d719073e",
+  "cleanup": "Relay queued deletion at 15:12:28 UTC; Coder listed zero QA workspaces by 15:12:55 UTC. The pre-test config was restored byte-for-byte, Relay restarted, and both pool gauges were 1 by 15:13:39 UTC; no manual deletion was needed."
+}

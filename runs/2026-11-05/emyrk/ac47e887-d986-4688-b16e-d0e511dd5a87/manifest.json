@@ -1,0 +1,29 @@
+{
+  "run_id": "ac47e887-d986-4688-b16e-d0e511dd5a87",
+  "tester": "Emyrk",
+  "started_at": "2026-11-05T15:10:29Z",
+  "ended_at": "2026-11-05T15:23:30Z",
+  "capture_mode": "QA-only controlled failure. Relay event timestamps and metric/Coder observations were backfilled into this report after the test. The provider prompt marker was instructed but is not visible in the Relay log or screenshot; the single claim in the fault window and matching user-facing message support correlation.",
+  "suite_revision": "5b80affb80c9285b7145d83616989544aa5c02ff",
+  "relay_revision": "23e85405e923e153baf2eb2ecab5576b3690c273",
+  "relay_binary_sha256": "9fa2150bfaa4598c1573e9e159d755a5cde1f45225b1b6e2cc65ef05804914ae",
+  "coderd_version": "v2.39.0-devel+36b472991d",
+  "organization": "steven",
+  "template": "agent-relay-qa-docker",
+  "template_version": "2267ce10-44a7-4cc4-a209-4fd7d088b60f",
+  "runner_image_digest": "unverified: the deliberately failed build was deleted before image metadata was inspected",
+  "baseline_pool_config_sha256": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
+  "fault_pool_config_sha256": "0210ab19137121a07a3e79bcbee0edf75e98062a51b6f81ff4e475120aec27d4",
+  "scope": "Q02-build only. Cursor pool qa-cursor used forced_failure_mode=terraform_build; Claude remained none. Baseline config was restored byte-for-byte and both pools reverified. No other Q02 variants ran.",
+  "events": [
+    {"at":"2026-11-05T15:10:29Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"operator","kind":"preflight_verified","time_basis":"observation","summary":"Both QA pools healthy, zero QA workspaces, Cursor fault mode none before test."},
+    {"at":"2026-11-05T15:11:28Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"operator","kind":"fault_config_verified","time_basis":"observation","summary":"Only qa-cursor forced_failure_mode changed to terraform_build; original nonsecret config backed up at mode 0600."},
+    {"at":"2026-11-05T15:11:36.279457183Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"relay_log","kind":"relay_started","time_basis":"event","summary":"QA Relay restarted on loopback listeners with the Cursor-only fault armed."},
+    {"at":"2026-11-05T15:11:38.312255163Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"relay_log","kind":"cursor_pool_verified","time_basis":"event","summary":"Cursor qa-cursor pool verified and began serving."},
+    {"at":"2026-11-05T15:11:41.735735529Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"relay_log","kind":"claude_pool_verified","time_basis":"event","summary":"Unaffected Claude qa-claude pool accepted its QA secret and began serving."},
+    {"at":"2026-11-05T15:11:53Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"metrics","kind":"fault_ready_verified","time_basis":"observation","summary":"Ready HTTP 200; both pool-health gauges 1, no QA workspaces active before request."},
+    {"at":"2026-11-05T15:12:55Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"coder_api","kind":"cleanup_verified","time_basis":"observation","summary":"No Cursor QA workspaces remained after Relay-initiated deletion; no manual deletion needed."},
+    {"at":"2026-11-05T15:13:39Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"operator","kind":"baseline_restored","time_basis":"observation","summary":"Original config restored byte-for-byte; Relay restarted, ready HTTP 200 with both pool-health gauges 1 and no QA workspaces."},
+    {"at":"2026-11-05T15:23:30Z","recorded_at":"2026-11-05T15:23:47.980804956Z","source":"operator","kind":"evidence_reviewed","time_basis":"observation","summary":"User-supplied screenshot visually reviewed and sanitized without changing any pixels; only this QA variant is reported."}
+  ]
+}
