@@ -12,7 +12,7 @@ DESTINATION = Path.home() / ".config" / "agent-relay-qa" / "config.yaml"
 
 def render():
     baseline = json.loads(SOURCE.read_text(encoding="utf-8"))
-    if baseline.get("status") != "CANDIDATE_NOT_DEPLOYED":
+    if baseline.get("status") != "QA_LOCAL_CONFIG":
         raise ValueError("unexpected baseline status; review config before rendering")
     config = baseline["config"].copy()
     if config.get("coderdURL") != "https://dogfood.cdr.dev" or config.get("statusUIAuth") != "coder-token":
