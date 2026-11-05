@@ -1,7 +1,7 @@
 {
   "run_id": "1149206e-7284-4dae-a35d-1633174db2de",
   "tester": "Emyrk",
-  "started_at": "2026-11-05T13:05:24Z",
+  "started_at": "2026-11-05T13:05:24.766098207Z",
   "ended_at": "2026-11-05T13:22:45Z",
   "capture_mode": "Retrospective from workspace-local Relay logs, Coder state, safe metrics, and explicit tester reply confirmation; exact UI reply times were not recorded. The prompts were not tagged with a preassigned run ID, so the operator correlated events privately by workspace ID and timestamp.",
   "suite_revision": "d77409bceedcc4aba75c10d276d335919d810cf3",
@@ -13,5 +13,11 @@
   "template_version": "2267ce10-44a7-4cc4-a209-4fd7d088b60f",
   "runner_image_digest": "sha256:f3c0b3ce3ed84a1233d11df56930cd1e26d4740c0162850ea40197a3243d3bb2",
   "pool_config_hash": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
-  "scope": "Q01-a Claude and Q01-b Cursor only. Initial nonmember failures are preserved in the evidence; the passing attempts occurred after org membership was corrected. No other cases were run."
+  "scope": "Q01-a Claude and Q01-b Cursor only. Initial nonmember failures are preserved in the evidence; the passing attempts occurred after org membership was corrected. No other cases were run.",
+  "events": [
+    {"at":"2026-11-05T13:05:24.766098207Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"earliest_observed_activity","time_basis":"event","summary":"Earliest recorded activity in this retrospectively assembled run; the exact tester start time was not captured."},
+    {"at":"2026-11-05T13:06:39.733559458Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"membership_correction_effective","time_basis":"observation","summary":"Fresh Claude owner resolution showed QA organization membership correction had taken effect; exact correction time unknown."},
+    {"at":"2026-11-05T13:22:01Z","recorded_at":"2026-11-05T13:51:28Z","source":"coder_api","kind":"cleanup_verified","time_basis":"observation","summary":"Coder listing showed zero remaining QA workspaces; no manual deletion was needed."},
+    {"at":"2026-11-05T13:22:45Z","recorded_at":"2026-11-05T13:53:32Z","source":"operator","kind":"final_state_observed","time_basis":"observation","summary":"Final workspace and Relay state checked; the Q01 result files were written later."}
+  ]
 }

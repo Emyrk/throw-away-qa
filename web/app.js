@@ -288,6 +288,7 @@ function agentInstructions(testCase, variant) {
     `Summary: ${valueText(testCase.summary)}`,
     `Variant ${valueText(variant.id)}: ${valueText(variant.title)}`,
     `Variant summary: ${valueText(variant.summary)}`,
+    "Follow AGENTS.md and qa-run/qa-record. Capture UTC timeline events for each step, poll, transition and cleanup; never guess a timestamp.",
     `Providers: ${values(testCase.providers).join(", ") || "-"}`,
     `Prerequisites:\n${listText(testCase.prerequisites)}`,
     `Baseline configuration: ${valueText(testCase.config?.baseline)}`,
@@ -408,6 +409,29 @@ function renderRunCoverage(section, testCase) {
   section.append(group);
 }
 
+function renderTimeline(container, events, title) {
+  if (!Array.isArray(events) || !events.length) return;
+  const section = node("section", "event-timeline");
+  section.append(node("h4", "", `${title} (${events.length})`));
+  const list = node("ol", "event-list");
+  for (const event of events) {
+    const item = node("li", "event-item");
+    const heading = node("div", "event-heading");
+    const timestamp = node("time", "event-time", valueText(event.at));
+    timestamp.dateTime = valueText(event.at);
+    heading.append(timestamp, node("strong", "event-kind", valueText(event.kind).replaceAll("_", " ")));
+    item.append(heading, node("p", "event-summary", valueText(event.summary)));
+    const details = [event.source, event.time_basis, event.subject, event.step && `step ${event.step}`].filter(Boolean);
+    item.append(node("p", "event-meta", details.join(" · ")));
+    if (event.recorded_at && event.recorded_at !== event.at) {
+      item.append(node("p", "event-recorded", `Recorded ${valueText(event.recorded_at)}`));
+    }
+    list.append(item);
+  }
+  section.append(list);
+  container.append(section);
+}
+
 function renderResults(testCase) {
   const section = node("section", "detail-section");
   section.append(sectionHeading("Recorded evidence", "03 / RESULTS"));
@@ -424,19 +448,22 @@ function renderResults(testCase) {
     card.append(head);
     const fields = node("dl", "fields result-fields");
     for (const [key, value] of Object.entries(result)) {
-      if (key === "case_id" || key === "status" || value === undefined) continue;
+      if (key === "case_id" || key === "status" || key === "events" || value === undefined) continue;
       if (key === "evidence") { renderEvidence(fields, value, path); continue; }
       const label = key.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
       addField(fields, label, /(?:^|_)(?:at|timestamp|time)$/.test(key) && typeof value === "string" ? formatDate(value) : value, typeof value === "object");
     }
     card.append(fields);
+    renderTimeline(card, result.events, "Test timeline");
     section.append(card);
   }
   if (state.run !== "") {
     const manifest = chosenRuns()[0]?.manifest;
     if (manifest !== null && manifest !== undefined) {
       const disclosure = node("details", "manifest");
-      disclosure.append(node("summary", "", "Run manifest"), node("pre", "", valueText(manifest)));
+      const { events, ...metadata } = manifest;
+      disclosure.append(node("summary", "", "Run manifest"), node("pre", "", valueText(metadata)));
+      renderTimeline(disclosure, events, "Run timeline");
       section.append(disclosure);
     }
   }

@@ -2,6 +2,7 @@
 # Probe the workspace-local QA relay. Do not commit raw output without review.
 set -eu
 
+printf 'Probe started at %s\n' "$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
 printf '%s\n' 'Readiness (200 means at least one pool verified, not both):'
 curl --silent --show-error --max-time 5 --write-out '\nHTTP %{http_code}\n' \
   http://127.0.0.1:22112/readyz

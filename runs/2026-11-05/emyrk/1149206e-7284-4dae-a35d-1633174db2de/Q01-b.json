@@ -10,5 +10,19 @@
     "The initial claim-failure counter stayed at one during the passing attempt, and the Relay reaped the finished Cursor workspace without selecting a Claude workspace."
   ],
   "evidence": ["evidence/Q01-b.md"],
-  "cleanup": "Relay queued deletion at 13:18:45 UTC after the session finished. At 13:22 UTC no steven QA workspaces remained; no manual deletion was needed."
+  "cleanup": "Relay queued deletion at 13:18:45 UTC after the session finished. At 13:22 UTC no steven QA workspaces remained; no manual deletion was needed.",
+  "events": [
+    {"at":"2026-11-05T13:05:44.130186985Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"initial_request_received","time_basis":"event","step":1,"subject":"cursor-initial","summary":"Initial Cursor QA request received; this attempt did not pass."},
+    {"at":"2026-11-05T13:05:44.428645962Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"initial_owner_rejected","time_basis":"event","step":1,"subject":"cursor-initial","summary":"Initial Cursor owner was not a member of the QA organization."},
+    {"at":"2026-11-05T13:05:46.842729705Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"initial_claim_failed","time_basis":"event","step":1,"subject":"cursor-initial","summary":"Relay failed the initial Cursor claim upstream."},
+    {"at":"2026-11-05T13:06:48.641531488Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"fresh_request_received","time_basis":"event","step":1,"subject":"cursor-a","summary":"Fresh Cursor QA request received after membership correction; INFO pending-request event observed."},
+    {"at":"2026-11-05T13:06:48.963993864Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"request_claimed","time_basis":"event","step":1,"subject":"cursor-a","summary":"Fresh Cursor QA request claimed by the QA pool."},
+    {"at":"2026-11-05T13:06:51.37755698Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"build_created","time_basis":"event","step":2,"subject":"cursor-a","summary":"Fresh Cursor QA workspace build created."},
+    {"at":"2026-11-05T13:07:03.509236217Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"runner_handoff","time_basis":"event","step":2,"subject":"cursor-a","summary":"Fresh Cursor QA build handed off to its runner."},
+    {"at":"2026-11-05T13:09:27Z","recorded_at":"2026-11-05T13:53:32Z","source":"metrics","kind":"runner_state_sample","time_basis":"observation","step":2,"subject":"cursor-a","summary":"Reaper gauge reported one Cursor QA workspace in working state."},
+    {"at":"2026-11-05T13:10:37Z","recorded_at":"2026-11-05T13:53:32Z","source":"metrics","kind":"runner_state_sample","time_basis":"observation","step":2,"subject":"cursor-a","summary":"Later reaper gauge still reported one Cursor QA workspace in working state."},
+    {"at":"2026-11-05T13:12:59Z","recorded_at":"2026-11-05T13:51:28Z","source":"tester","kind":"reply_confirmed","time_basis":"confirmation","step":2,"subject":"cursor-a","summary":"Tester confirmed a visible Cursor reply by this time; actual UI completion time unknown."},
+    {"at":"2026-11-05T13:18:46.290303655Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"deletion_queued","time_basis":"event","subject":"cursor-a","summary":"Relay queued deletion of Cursor workspace because its session finished; finish cause not established."},
+    {"at":"2026-11-05T13:22:01Z","recorded_at":"2026-11-05T13:51:28Z","source":"coder_api","kind":"cleanup_verified","time_basis":"observation","summary":"Coder listing showed zero remaining QA workspaces, including Cursor; no manual deletion was needed."}
+  ]
 }

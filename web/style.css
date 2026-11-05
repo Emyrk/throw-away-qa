@@ -135,6 +135,17 @@ h1 em { color: #167e78; font-style: normal; }
 .manifest { margin-top: 16px; padding: 13px 16px; border: 1px solid #e1e8e5; border-radius: 8px; font-size: 12px; }
 .manifest summary { cursor: pointer; font-weight: 750; }
 .manifest pre { overflow: auto; margin: 14px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 11px; }
+.event-timeline { margin-top: 18px; padding-top: 16px; border-top: 1px solid #e4ebe7; }
+.event-timeline h4 { margin: 0 0 14px; font-size: 13px; }
+.event-list { list-style: none; margin: 0; padding: 0 0 0 17px; border-left: 2px solid #d2e8df; }
+.event-item { position: relative; padding: 0 0 16px 17px; }
+.event-item:last-child { padding-bottom: 0; }
+.event-item::before { content: ""; position: absolute; left: -23px; top: 4px; width: 9px; height: 9px; border-radius: 50%; background: #138076; }
+.event-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.event-time { color: #175d59; font: 700 11px ui-monospace, SFMono-Regular, Consolas, monospace; overflow-wrap: anywhere; }
+.event-kind { color: #203740; font-size: 12px; text-transform: capitalize; }
+.event-summary { margin: 5px 0; color: #203740; font-size: 12px; line-height: 1.5; }
+.event-meta, .event-recorded { margin: 3px 0 0; color: #63787d; font-size: 11px; line-height: 1.4; overflow-wrap: anywhere; }
 .muted { color: #687a80; font-size: 13px; line-height: 1.6; }
 .load-error { padding: 14px 18px; margin: 0 0 20px; border: 1px solid #edc3bb; border-radius: 9px; background: #fff1ef; color: #8e3b31; font-size: 13px; line-height: 1.5; overflow-wrap: anywhere; }
 .page-note { padding: 14px 0; color: #78898b; font-size: 11px; text-align: center; }

@@ -30,7 +30,7 @@ Open the local port 8000 through your Coder workspace app or browser. The page i
 
 ## Record a result
 
-In your persistent tester workspace, clone this repository, read `AGENTS.md`, and ask your agent to use `qa-run` on a case ID. The agent records a unique `runs/<date>/<tester>/<run-id>/manifest.json`, then uses `qa-record` to save one `<variant-id>.json` per attempted variant with redacted evidence. The agent uses `qa-publish` to validate and commit its own run directly to this repository's `main`. No browser write API, database or result PR is required. Agents must never turn an unobserved condition into a pass.
+In your persistent tester workspace, clone this repository, read `AGENTS.md`, and ask your agent to use `qa-run` on a case ID. The agent records a unique `runs/<date>/<tester>/<run-id>/manifest.json`, then uses `qa-record` to save one `<variant-id>.json` per attempted variant with a detailed public-safe UTC event timeline and redacted evidence. Every event distinguishes its occurrence or observation time from when it was recorded; later tester confirmations are not represented as the reply's exact completion time. The agent uses `qa-publish` to validate and commit its own run directly to this repository's `main`. No browser write API, database or result PR is required. Agents must never turn an unobserved condition into a pass.
 
 The normal run sequence is:
 

@@ -10,5 +10,21 @@
     "The Relay reaped the two finished Claude workspaces; neither was selected by the Cursor pool."
   ],
   "evidence": ["evidence/Q01-a.md"],
-  "cleanup": "Relay queued deletions at 13:07:30 and 13:18:14 UTC after the sessions finished. At 13:22 UTC no steven QA workspaces remained; no manual deletion was needed."
+  "cleanup": "Relay queued deletions at 13:07:30 and 13:18:14 UTC after the sessions finished. At 13:22 UTC no steven QA workspaces remained; no manual deletion was needed.",
+  "events": [
+    {"at":"2026-11-05T13:05:24.766098207Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"initial_owner_rejected","time_basis":"event","step":1,"subject":"claude-initial","summary":"Initial Claude QA owner was not resolvable in the QA organization; this attempt did not pass."},
+    {"at":"2026-11-05T13:05:24.87334257Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"initial_request_nacked","time_basis":"event","step":1,"subject":"claude-initial","summary":"Relay nacked the initial Claude request as non-retryable."},
+    {"at":"2026-11-05T13:06:39.733559458Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"fresh_owner_resolved","time_basis":"event","step":1,"subject":"claude-a","summary":"Owner resolved for a fresh Claude QA attempt after membership correction; exact request time unknown."},
+    {"at":"2026-11-05T13:06:41.617807447Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"build_created","time_basis":"event","step":2,"subject":"claude-a","summary":"First fresh Claude QA workspace build created."},
+    {"at":"2026-11-05T13:06:53.772454415Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"runner_handoff","time_basis":"event","step":2,"subject":"claude-a","summary":"First fresh Claude QA build handed off to its runner."},
+    {"at":"2026-11-05T13:07:04.859399602Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"fresh_owner_resolved","time_basis":"event","step":1,"subject":"claude-b","summary":"Owner resolved for second fresh Claude QA attempt; exact request time unknown."},
+    {"at":"2026-11-05T13:07:06.969904755Z","recorded_at":"2026-11-05T13:53:32Z","source":"relay_log","kind":"build_created","time_basis":"event","step":2,"subject":"claude-b","summary":"Second fresh Claude QA workspace build created."},
+    {"at":"2026-11-05T13:07:19.107111139Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"runner_handoff","time_basis":"event","step":2,"subject":"claude-b","summary":"Second fresh Claude QA build handed off to its runner."},
+    {"at":"2026-11-05T13:07:30.960028211Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"deletion_queued","time_basis":"event","subject":"claude-a","summary":"Relay queued deletion of first Claude workspace because its session finished; finish cause not established."},
+    {"at":"2026-11-05T13:09:27Z","recorded_at":"2026-11-05T13:53:32Z","source":"metrics","kind":"runner_state_sample","time_basis":"observation","step":2,"subject":"claude-b","summary":"Reaper gauge reported one Claude QA workspace in serving state."},
+    {"at":"2026-11-05T13:10:37Z","recorded_at":"2026-11-05T13:53:32Z","source":"metrics","kind":"runner_state_sample","time_basis":"observation","step":2,"subject":"claude-b","summary":"Later reaper gauge still reported one Claude QA workspace in serving state."},
+    {"at":"2026-11-05T13:12:59Z","recorded_at":"2026-11-05T13:51:28Z","source":"tester","kind":"reply_confirmed","time_basis":"confirmation","step":2,"summary":"Tester confirmed a visible Claude reply by this time; actual UI completion time unknown."},
+    {"at":"2026-11-05T13:18:14.715249965Z","recorded_at":"2026-11-05T13:51:28Z","source":"relay_log","kind":"deletion_queued","time_basis":"event","subject":"claude-b","summary":"Relay queued deletion of second Claude workspace because its session finished; finish cause not established."},
+    {"at":"2026-11-05T13:22:01Z","recorded_at":"2026-11-05T13:51:28Z","source":"coder_api","kind":"cleanup_verified","time_basis":"observation","summary":"Coder listing showed zero remaining QA workspaces, including Claude; no manual deletion was needed."}
+  ]
 }

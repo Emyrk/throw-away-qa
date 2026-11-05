@@ -15,7 +15,9 @@ CASE = {
     "prs": [96], "estimated_minutes": 15, "prerequisites": [], "config": {}, "notes": [],
     "variants": [{"id": "Q01-a", "title": "Run", "summary": "Checks that a workspace becomes ready within the expected window.", "cleanup": ["Delete QA workspace"], "steps": [
         {"action": "Start", "wait_seconds": 0, "poll_seconds": 10, "timeout_seconds": 60,
-         "expected": "Ready", "evidence": "Record status"}
+         "expected": "Ready", "evidence": "Record status"},
+        {"action": "Confirm reply", "wait_seconds": 0, "poll_seconds": 0, "timeout_seconds": 60,
+         "expected": "Reply", "evidence": "Record tester confirmation"}
     ]}],
 }
 
@@ -32,11 +34,24 @@ class ValidationTests(unittest.TestCase):
         self.write(self.run / "manifest.json", {
             "run_id": "run-123", "tester": "tester", "started_at": "2026-11-04T18:00:00Z",
             "suite_revision": "abc", "relay_revision": "def", "organization": "steven",
+            "events": [{
+                "at": "2026-11-04T18:00:00Z", "recorded_at": "2026-11-04T18:00:00Z",
+                "source": "operator", "kind": "run_started", "time_basis": "event",
+                "summary": "The QA run began."
+            }],
         })
         self.write(self.run / "Q01-a.json", {
             "case_id": "Q01", "variant_id": "Q01-a", "status": "pass",
-            "observed_at": "2026-11-04T18:05:00Z", "observations": ["Saw ready at 18:05Z"],
-            "evidence": [], "cleanup": "No resources created",
+            "observed_at": "2026-11-04T18:05:00Z", "observations": ["Saw ready and reply at 18:05Z"],
+            "events": [
+                {"at": "2026-11-04T18:01:00.123456789Z", "recorded_at": "2026-11-04T18:02:00Z",
+                 "source": "relay_log", "kind": "workspace_ready", "time_basis": "event", "step": 1,
+                 "subject": "claude-a", "summary": "The QA workspace was ready."},
+                {"at": "2026-11-04T18:05:00Z", "recorded_at": "2026-11-04T18:05:00Z",
+                 "source": "tester", "kind": "reply_confirmed", "time_basis": "confirmation", "step": 2,
+                 "subject": "claude-a", "summary": "The tester confirmed a reply."}
+            ],
+            "evidence": [], "cleanup": "The QA workspace was cleaned up",
         })
         self.patches = [
             patch.object(validate, "CASES", self.root / "cases"),
@@ -71,6 +86,80 @@ class ValidationTests(unittest.TestCase):
         self.write(path, case)
         with self.assertRaisesRegex(validate.Invalid, "one or two complete sentences"):
             validate.collect()
+
+    def test_manifest_without_timeline_rejected(self):
+        path = self.run / "manifest.json"
+        manifest = json.loads(path.read_text())
+        del manifest["events"]
+        self.write(path, manifest)
+        with self.assertRaisesRegex(validate.Invalid, "timestamped event is required"):
+            validate.collect()
+
+    def test_result_without_timeline_rejected(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        del result["events"]
+        self.write(path, result)
+        with self.assertRaisesRegex(validate.Invalid, "timestamped event is required"):
+            validate.collect()
+
+    def test_event_raw_payload_field_rejected(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        result["events"][0]["raw_response"] = "unreviewed payload"
+        self.write(path, result)
+        with self.assertRaisesRegex(validate.Invalid, "unexpected field"):
+            validate.collect()
+
+    def test_missing_recorded_at_rejected(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        del result["events"][0]["recorded_at"]
+        self.write(path, result)
+        with self.assertRaisesRegex(validate.Invalid, "recorded_at"):
+            validate.collect()
+
+    def test_bad_timestamp_rejected(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        result["events"][0]["at"] = "2026-11-04T18:01:00+01:00"
+        self.write(path, result)
+        with self.assertRaisesRegex(validate.Invalid, "UTC RFC3339"):
+            validate.collect()
+
+    def test_events_must_be_chronological(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        result["events"].reverse()
+        self.write(path, result)
+        with self.assertRaisesRegex(validate.Invalid, "ordered by event time"):
+            validate.collect()
+
+    def test_nanosecond_event_order_preserved(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        result["events"][1]["at"] = "2026-11-04T18:01:00.123456788Z"
+        self.write(path, result)
+        with self.assertRaisesRegex(validate.Invalid, "ordered by event time"):
+            validate.collect()
+
+    def test_pass_requires_each_step_timestamped(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        result["events"] = result["events"][:1]
+        self.write(path, result)
+        with self.assertRaisesRegex(validate.Invalid, "every step"):
+            validate.collect()
+
+    def test_blocked_requires_event_but_not_every_step(self):
+        path = self.run / "Q01-a.json"
+        result = json.loads(path.read_text())
+        result["status"] = "blocked"
+        result["reason"] = "QA account was not enabled"
+        result["events"] = result["events"][:1]
+        self.write(path, result)
+        _, runs = validate.collect()
+        self.assertEqual("blocked", runs[0]["results"][0]["status"])
 
     def test_unobserved_result_rejected(self):
         path = self.run / "Q01-a.json"

@@ -11,10 +11,10 @@ Use one unique run directory per tester and environment revision. Keep the trans
 
 1. Read `AGENTS.md`, `README.md`, the selected `cases/Qxx.json`, and `config/baseline.json`. Confirm the user wants to run this case and has access to the named provider. Read each variant's prerequisites and cleanup before making changes.
 2. Check `git status --short -b`, `git remote -v`, and `git fetch origin main`. Do not discard local work. Record the suite commit with `git rev-parse HEAD`; if behind, update safely before starting. Verify the target relay's running image digest/source SHA, coderd version, template version and image digest, module versions, and active pool config. If an item cannot be verified, name it in the run manifest and mark dependent cases blocked.
-3. Identify the tester from an authenticated source, not a guessed login. Ask if necessary. Use a filename-safe tester slug and generate a UUID-based run ID. Create `runs/<UTC-date>/<tester>/<run-id>/manifest.json` with `run_id`, `tester`, `started_at` (UTC ISO 8601), `suite_revision`, `relay_revision`, `organization: "steven"`, and known environment details. Never store credentials or personal email.
-4. Read the selected variant step by step with the tester. Present the exact configuration overlay and confirm it applies **only** to the QA pool. Capture a baseline status/metrics snapshot before triggering a provider request. Ask before fault injection, deleting a workspace, changing a template version or restarting the QA relay.
-5. Carry out observable checks. Wait and poll for the intervals in the case, recording actual UTC times rather than assuming a condition happened on schedule. If the condition does not occur by its timeout, record that observation and continue to cleanup. Ask the tester to confirm UI observations the agent cannot inspect directly.
-6. Hand observations to `qa-record`. A run can contain results for one or more cases. Do not fill other case results with guessed passes.
+3. Identify the tester from an authenticated source, not a guessed login. Ask if necessary. Use a filename-safe tester slug and generate a UUID-based run ID. Create `runs/<UTC-date>/<tester>/<run-id>/manifest.json` with `run_id`, `tester`, `started_at` (UTC RFC3339), `suite_revision`, `relay_revision`, `organization: "steven"`, and known environment details. Add a timestamped `events` entry for the run's first observed action. Never store credentials or personal email.
+4. Read the selected variant step by step with the tester. Present the exact configuration overlay and confirm it applies **only** to the QA pool. Capture baseline status/metrics with a UTC timestamp before triggering a provider request; append configuration, approvals and version snapshots to the run-level timeline. Ask before fault injection, deleting a workspace, changing a template version or restarting the QA relay.
+5. Carry out observable checks. Capture the actual UTC time at **each** step transition, wait start/end, poll, provider request/claim, build state, runner state, user confirmation and cleanup. Retain a source and pseudonym for correlation. A timeout is a timestamped observation, not proof the system never acted. Do not backdate a tester's confirmation to the presumed reply time; mark it as a confirmation whose true occurrence is unknown.
+6. At run end, set `ended_at` after the last observation and record cleanup/restoration events in the appropriate variant timeline. Hand the recorded events and outcome to `qa-record`. A run can contain results for one or more cases; do not fill other case results with guessed passes.
 
 ## Example manifest
 
@@ -27,7 +27,15 @@ Use one unique run directory per tester and environment revision. Keep the trans
   "relay_revision": "<running image source SHA or unverified>",
   "organization": "steven",
   "template_version": "<recorded template version>",
-  "pool_config_hash": "<nonsecret config digest>"
+  "pool_config_hash": "<nonsecret config digest>",
+  "events": [{
+    "at": "2026-11-04T18:30:00Z",
+    "recorded_at": "2026-11-04T18:30:00Z",
+    "source": "operator",
+    "kind": "run_started",
+    "time_basis": "event",
+    "summary": "The QA run began after checking the target revision."
+  }]
 }
 ```
 
