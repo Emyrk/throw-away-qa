@@ -1,0 +1,80 @@
+{
+  "run_id": "86b6d6f9-6217-485d-ab9b-e3cc303551d8",
+  "tester": "Emyrk",
+  "started_at": "2026-11-05T17:47:49.648605521Z",
+  "ended_at": "2026-11-05T18:15:51.749353149Z",
+  "suite_revision": "04e5f758a5b5ac1b4893351e8b4832ca695e61ae",
+  "relay_revision": "44c6026ea1f840b56fa73299ac77ba1f0bb02822",
+  "relay_binary_sha256": "8807536a6ca3cfe59dff5d0ca38d18add4e3dfffd9784ada3e88b81bc1c38312",
+  "coderd_version": "v2.39.0-devel+e7706406f4",
+  "organization": "steven",
+  "template": "agent-relay-qa-docker",
+  "template_version": "2267ce10-44a7-4cc4-a209-4fd7d088b60f",
+  "runner_image_digest": "sha256:f3c0b3ce3ed84a1233d11df56930cd1e26d4740c0162850ea40197a3243d3bb2",
+  "baseline_pool_config_sha256": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
+  "fault_pool_config_sha256": "a9c6a9ab72238e38d9611513aabd979c0965842e7bd296dd8573dafd87ac83e0",
+  "scope": "Q02-startup ran only on qa-cursor in steven with forced_failure_mode=coder_agent_connection, reapStartupGrace=2m, cursor dispatch_deadline=3m and reapDelay=0s. Claude remained normal. Tester led the provider request and confirmed the Cursor error screenshot. By 18:01:44Z the baseline binary and config were restored byte-for-byte and both pools were healthy.",
+  "events": [
+    {
+      "at": "2026-11-05T17:47:49.648605521Z",
+      "recorded_at": "2026-11-05T17:47:49.648605521Z",
+      "source": "operator",
+      "kind": "run_started",
+      "time_basis": "observation",
+      "summary": "User authorized preparing Q02-startup with a 2m creation-based grace, 3m QA Cursor dispatch deadline and 0s reap delay; prior healthy pools, baseline config hash and no visible QA template workspaces were checked."
+    },
+    {
+      "at": "2026-11-05T17:48:25.286553Z",
+      "recorded_at": "2026-11-05T17:49:21.538041584Z",
+      "source": "operator",
+      "kind": "fault_config_verified",
+      "time_basis": "observation",
+      "summary": "Original QA Relay binary and mode-0600 config were backed up byte-for-byte. Only qa-cursor was set to coder_agent_connection with a 3m dispatch deadline; shared startup grace is 2m and reap delay remains 0s. Claude fault mode remains none."
+    },
+    {
+      "at": "2026-11-05T17:48:38Z",
+      "recorded_at": "2026-11-05T17:49:21.538041584Z",
+      "source": "operator",
+      "kind": "previous_relay_stopped",
+      "time_basis": "observation",
+      "summary": "Previous QA-only relay stopped gracefully; both loopback listeners were free before starting the branch build."
+    },
+    {
+      "at": "2026-11-05T17:48:42.439930263Z",
+      "recorded_at": "2026-11-05T17:49:21.538041584Z",
+      "source": "relay_log",
+      "kind": "cursor_pool_verified",
+      "time_basis": "event",
+      "summary": "Branch QA Relay verified Cursor pool qa-cursor and began serving the scoped fault configuration."
+    },
+    {
+      "at": "2026-11-05T17:48:54Z",
+      "recorded_at": "2026-11-05T17:49:21.538041584Z",
+      "source": "metrics",
+      "kind": "fault_ready_verified",
+      "time_basis": "observation",
+      "summary": "QA Relay ready endpoint and status health returned HTTP 200; both pool-health gauges were 1 and process executable matched the branch binary checksum. No provider request was submitted by the agent."
+    },
+    {"at":"2026-11-05T17:54:21.266550907Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"relay_log","kind":"request_claimed","time_basis":"event","subject":"cursor-startup-a","summary":"QA Cursor pool claimed one pending request; pseudonym request 0b986656d8."},
+    {"at":"2026-11-05T17:54:21.623833Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"coder_api","kind":"build_created","time_basis":"event","subject":"cursor-startup-a","summary":"Coder latest build CreatedAt for the scoped QA workspace pseudonym b5a88770cb. The 2m creation-based threshold is 17:56:21.623833Z."},
+    {"at":"2026-11-05T17:54:22.33499221Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"relay_log","kind":"workspace_build_created_log","time_basis":"event","subject":"cursor-startup-a","summary":"Relay logged workspace build creation for the same pseudonymous request and workspace."},
+    {"at":"2026-11-05T17:54:31.938720116Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"tester","kind":"request_started_confirmed","time_basis":"confirmation","subject":"cursor-startup-a","summary":"Tester said Cursor started. This is a confirmation observation, not the provider receipt or prompt submission time; prompt marker not independently verified."},
+    {"at":"2026-11-05T17:54:32.129669Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"coder_api","kind":"build_succeeded","time_basis":"event","subject":"cursor-startup-a","summary":"Latest provisioner job completed successfully; build was running while the agent still had no first connection."},
+    {"at":"2026-11-05T17:54:34.43281108Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"relay_log","kind":"runner_handoff","time_basis":"event","subject":"cursor-startup-a","summary":"Relay logged workspace ready and runner handoff. This is not evidence that the agent connected or served a request."},
+    {"at":"2026-11-05T17:55:08.718408523Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"coder_api","kind":"agent_connecting_observed","time_basis":"observation","subject":"cursor-startup-a","summary":"Agent status connecting, first_connected_at absent; image digest captured from Coder build metadata."},
+    {"at":"2026-11-05T17:56:19.430575Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"metrics","kind":"before_grace_observed","time_basis":"observation","subject":"cursor-startup-a","summary":"Workspace still running with agent connecting; QA Cursor reaper recorded four keep verdicts and zero failed verdicts before the 2m threshold."},
+    {"at":"2026-11-05T17:56:41.303421Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"coder_api","kind":"agent_timeout_observed","time_basis":"observation","subject":"cursor-startup-a","summary":"Agent status was timeout; first connection was never observed."},
+    {"at":"2026-11-05T17:56:45.980573776Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"relay_log","kind":"runner_start_failed","time_basis":"event","subject":"cursor-startup-a","summary":"Reaper judged the runner never started at build age 2m24s, after the configured creation-based 2m threshold."},
+    {"at":"2026-11-05T17:56:46.467517302Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"relay_log","kind":"fail_claim_applied","time_basis":"event","subject":"cursor-startup-a","summary":"Cursor fail-claim completed upstream with stage worker, retryable true and the expected fixed safe retry guidance; applied=true metric subsequently confirmed. Provider UI display still needs tester confirmation."},
+    {"at":"2026-11-05T17:56:46.624587822Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"relay_log","kind":"delete_queued","time_basis":"event","subject":"cursor-startup-a","summary":"Relay queued deletion of the failed QA workspace."},
+    {"at":"2026-11-05T17:57:03.607099Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"coder_api","kind":"workspace_absent_observed","time_basis":"observation","subject":"cursor-startup-a","summary":"No QA template workspace remained visible in the tester listing after the queued delete."},
+    {"at":"2026-11-05T18:00:59.684655645Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"metrics","kind":"fail_counter_verified","time_basis":"observation","subject":"cursor-startup-a","summary":"QA Cursor claim_fails_total applied=true retryable=true increased to one; reaper failed verdict count one; both pool-health gauges stayed one and no QA template workspace was visible."},
+    {"at":"2026-11-05T18:01:24Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"operator","kind":"baseline_restored","time_basis":"observation","subject":"cursor-startup-a","summary":"Stopped branch QA Relay and restored original private config and binary byte-for-byte by checksum; forced fault and shortened timeouts removed."},
+    {"at":"2026-11-05T18:01:29.638880833Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"relay_log","kind":"baseline_cursor_pool_verified","time_basis":"event","subject":"cursor-startup-a","summary":"Original QA Relay verified the normal qa-cursor pool after restart."},
+    {"at":"2026-11-05T18:01:44Z","recorded_at":"2026-11-05T18:02:04.535246900Z","source":"metrics","kind":"cleanup_verified","time_basis":"observation","subject":"cursor-startup-a","summary":"Original config and binary hashes matched backups; both QA pools healthy, ready and status endpoints HTTP 200, no QA template workspaces visible."},
+    {"at":"2026-11-05T18:03:06.626501Z","recorded_at":"2026-11-05T18:03:06.626501Z","source":"tester","kind":"request_start_time_confirmed","time_basis":"confirmation","subject":"cursor-startup-a","summary":"Tester later clarified that Cursor was started at 11:54 AM CST, equivalent to 17:54 UTC at minute precision. Exact prompt submission second is unknown; the Relay claim occurred at 17:54:21.266550907Z."},
+    {"at":"2026-11-05T18:13:10Z","recorded_at":"2026-11-05T18:15:51.749353149Z","source":"script","kind":"error_screenshot_created","time_basis":"event","subject":"cursor-startup-a","summary":"Original screenshot's Creation Time text records 12:13:10 PM CST (18:13:10 UTC). This is not the time the provider first displayed the error."},
+    {"at":"2026-11-05T18:14:19.254474315Z","recorded_at":"2026-11-05T18:15:51.749353149Z","source":"tester","kind":"error_screenshot_confirmed","time_basis":"confirmation","subject":"cursor-startup-a","summary":"Tester supplied a local screenshot and confirmed Cursor displayed the retryable self-hosted pool error ending in the exact fixed Relay worker-failure message. Exact first display time is unknown."},
+    {"at":"2026-11-05T18:15:51.749353149Z","recorded_at":"2026-11-05T18:15:51.749353149Z","source":"operator","kind":"screenshot_reviewed","time_basis":"observation","subject":"cursor-startup-a","summary":"Visually reviewed original and metadata-stripped screenshot; decoded pixels match, no sensitive content visible, public PNG retains only image chunks."}
+  ]
+}
