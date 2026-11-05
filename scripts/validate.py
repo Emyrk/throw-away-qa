@@ -3,7 +3,9 @@
 
 import json
 import re
+import struct
 import sys
+import zlib
 from datetime import datetime
 from pathlib import Path
 
@@ -14,6 +16,8 @@ STATUSES = {"pass", "fail", "blocked", "not-in-build"}
 EVENT_SOURCES = {"relay_log", "coder_api", "metrics", "tester", "operator", "provider_ui", "provider_api", "script"}
 TIME_BASES = {"event", "observation", "confirmation"}
 UTC_TIMESTAMP = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,9})?Z$")
+PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
+PNG_CHUNKS = {b"IHDR", b"PLTE", b"IDAT", b"IEND", b"sRGB", b"gAMA", b"cHRM", b"pHYs", b"tRNS"}
 SECRET = re.compile(
     r"(?:[\w.+-]+@[\w.-]+\.[A-Za-z]{2,}|"
     r"(?:gh[pousr]_|github_pat_|sk-ant-|sk-proj-)[A-Za-z0-9_-]{8,}|"
@@ -136,6 +140,37 @@ def validate_case(path):
     return case
 
 
+def validate_png(path):
+    require(path.stat().st_size <= 2_000_000, f"{path}: PNG exceeds 2 MB public evidence limit")
+    image = path.read_bytes()
+    require(image.startswith(PNG_SIGNATURE), f"{path}: invalid PNG signature")
+    offset = len(PNG_SIGNATURE)
+    seen_ihdr = seen_idat = seen_iend = False
+    while offset + 12 <= len(image):
+        length = struct.unpack_from(">I", image, offset)[0]
+        kind = image[offset + 4:offset + 8]
+        end = offset + 12 + length
+        require(end <= len(image), f"{path}: incomplete PNG chunk")
+        require(kind in PNG_CHUNKS, f"{path}: unsupported PNG metadata or chunk; strip it before publishing")
+        content = image[offset + 8:offset + 8 + length]
+        expected_crc = struct.unpack_from(">I", image, offset + 8 + length)[0]
+        require(zlib.crc32(kind + content) == expected_crc, f"{path}: invalid PNG chunk checksum")
+        if kind == b"IHDR":
+            require(not seen_ihdr and offset == len(PNG_SIGNATURE) and length == 13, f"{path}: invalid PNG header")
+            width, height = struct.unpack_from(">II", content)
+            require(0 < width <= 2000 and 0 < height <= 1500, f"{path}: PNG dimensions exceed evidence limit")
+            seen_ihdr = True
+        elif kind == b"IDAT":
+            require(seen_ihdr and not seen_iend, f"{path}: PNG image data out of order")
+            seen_idat = True
+        elif kind == b"IEND":
+            require(seen_idat and length == 0 and end == len(image), f"{path}: invalid PNG end")
+            seen_iend = True
+            break
+        offset = end
+    require(seen_ihdr and seen_idat and seen_iend, f"{path}: incomplete PNG image")
+
+
 def validate_run(run_dir, cases):
     require(not run_dir.is_symlink(), f"symlink not allowed: {run_dir}")
     manifest_path = run_dir / "manifest.json"
@@ -182,8 +217,11 @@ def validate_run(run_dir, cases):
     for path in run_dir.rglob("*"):
         require(not path.is_symlink(), f"symlink not allowed: {path}")
         if path.is_file():
-            require(path.suffix.lower() in {".txt", ".json", ".md", ".log", ".csv"}, f"{path}: unsupported evidence type; only reviewable text is allowed")
-            check_public(path, path.read_text(encoding="utf-8"))
+            if path.suffix.lower() == ".png":
+                validate_png(path)
+            else:
+                require(path.suffix.lower() in {".txt", ".json", ".md", ".log", ".csv"}, f"{path}: unsupported evidence type")
+                check_public(path, path.read_text(encoding="utf-8"))
     return {"path": str(run_dir.relative_to(ROOT)), "manifest": manifest, "results": results}
 
 

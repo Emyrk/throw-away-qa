@@ -2,8 +2,10 @@
 """Regression tests for case and result validation."""
 
 import json
+import struct
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -65,6 +67,15 @@ class ValidationTests(unittest.TestCase):
     @staticmethod
     def write(path, value):
         path.write_text(json.dumps(value), encoding="utf-8")
+
+    @staticmethod
+    def png_chunk(kind, data):
+        return struct.pack(">I", len(data)) + kind + data + struct.pack(">I", zlib.crc32(kind + data))
+
+    def png_image(self, extra=b""):
+        header = self.png_chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 6, 0, 0, 0))
+        pixels = self.png_chunk(b"IDAT", zlib.compress(b"\x00\xff\x00\x00\xff"))
+        return validate.PNG_SIGNATURE + header + extra + pixels + self.png_chunk(b"IEND", b"")
 
     def test_valid_run(self):
         cases, runs = validate.collect()
@@ -185,9 +196,20 @@ class ValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(validate.Invalid, "possible secret or email"):
             validate.collect()
 
-    def test_binary_evidence_rejected(self):
-        (self.run / "snapshot.png").write_bytes(b"not reviewed")
-        with self.assertRaisesRegex(validate.Invalid, "unsupported evidence type"):
+    def test_invalid_png_rejected(self):
+        (self.run / "snapshot.png").write_bytes(b"not a screenshot")
+        with self.assertRaisesRegex(validate.Invalid, "invalid PNG signature"):
+            validate.collect()
+
+    def test_redacted_png_accepted(self):
+        (self.run / "snapshot.png").write_bytes(self.png_image())
+        _, runs = validate.collect()
+        self.assertEqual("pass", runs[0]["results"][0]["status"])
+
+    def test_png_metadata_chunk_rejected(self):
+        metadata = self.png_chunk(b"tEXt", b"private=unreviewed")
+        (self.run / "snapshot.png").write_bytes(self.png_image(extra=metadata))
+        with self.assertRaisesRegex(validate.Invalid, "unsupported PNG metadata"):
             validate.collect()
 
     def test_path_escape_rejected(self):
