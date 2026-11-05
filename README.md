@@ -40,4 +40,4 @@ The normal run sequence is:
 4. Validate and inspect the public diff, then commit results to `main`.
 5. Refresh the viewer after publication.
 
-Only intentionally public, redacted evidence may be committed. Do not store emails, credentials, provider work orders, private logs or chat transcripts. User-requested screenshots may be included as small PNGs without text or EXIF metadata **after visual review**; the validator cannot detect secrets in pixels. The validator catches common leak patterns in text, but human review remains necessary.
+Only intentionally public, redacted evidence may be committed. Do not store emails, credentials, provider work orders, private logs or chat transcripts. User-requested screenshots may be included as small PNGs without text or EXIF metadata **after visual review**. Run `python3 scripts/sanitize-png.py <private-original.png> runs/<date>/<tester>/<run-id>/evidence/<name>.png` to strip embedded metadata without overwriting the original, then inspect the resulting pixels before commit. The validator cannot detect secrets in pixels. The validator catches common leak patterns in text, but human review remains necessary.

@@ -140,21 +140,25 @@ def validate_case(path):
     return case
 
 
-def validate_png(path):
+def png_bytes(path, strip_metadata=False):
     require(path.stat().st_size <= 2_000_000, f"{path}: PNG exceeds 2 MB public evidence limit")
     image = path.read_bytes()
     require(image.startswith(PNG_SIGNATURE), f"{path}: invalid PNG signature")
     offset = len(PNG_SIGNATURE)
+    clean = [PNG_SIGNATURE]
     seen_ihdr = seen_idat = seen_iend = False
     while offset + 12 <= len(image):
         length = struct.unpack_from(">I", image, offset)[0]
         kind = image[offset + 4:offset + 8]
         end = offset + 12 + length
         require(end <= len(image), f"{path}: incomplete PNG chunk")
-        require(kind in PNG_CHUNKS, f"{path}: unsupported PNG metadata or chunk; strip it before publishing")
+        require(kind in PNG_CHUNKS or (strip_metadata and kind and kind[0] & 0x20),
+                f"{path}: unsupported PNG metadata or chunk; strip it before publishing")
         content = image[offset + 8:offset + 8 + length]
         expected_crc = struct.unpack_from(">I", image, offset + 8 + length)[0]
         require(zlib.crc32(kind + content) == expected_crc, f"{path}: invalid PNG chunk checksum")
+        if kind in PNG_CHUNKS:
+            clean.append(image[offset:end])
         if kind == b"IHDR":
             require(not seen_ihdr and offset == len(PNG_SIGNATURE) and length == 13, f"{path}: invalid PNG header")
             width, height = struct.unpack_from(">II", content)
@@ -169,6 +173,11 @@ def validate_png(path):
             break
         offset = end
     require(seen_ihdr and seen_idat and seen_iend, f"{path}: incomplete PNG image")
+    return b"".join(clean)
+
+
+def validate_png(path):
+    png_bytes(path)
 
 
 def validate_run(run_dir, cases):

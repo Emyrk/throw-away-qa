@@ -212,6 +212,17 @@ class ValidationTests(unittest.TestCase):
         with self.assertRaisesRegex(validate.Invalid, "unsupported PNG metadata"):
             validate.collect()
 
+    def test_png_metadata_can_be_stripped(self):
+        metadata = self.png_chunk(b"tEXt", b"private=unreviewed")
+        source = self.run / "source.png"
+        source.write_bytes(self.png_image(extra=metadata))
+        cleaned = self.run / "clean.png"
+        cleaned.write_bytes(validate.png_bytes(source, strip_metadata=True))
+        source.unlink()
+        self.assertNotIn(b"tEXt", cleaned.read_bytes())
+        _, runs = validate.collect()
+        self.assertEqual("pass", runs[0]["results"][0]["status"])
+
     def test_path_escape_rejected(self):
         path = self.run / "Q01-a.json"
         result = json.loads(path.read_text())
