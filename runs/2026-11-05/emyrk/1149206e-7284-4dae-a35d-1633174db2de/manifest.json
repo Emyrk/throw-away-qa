@@ -1,0 +1,17 @@
+{
+  "run_id": "1149206e-7284-4dae-a35d-1633174db2de",
+  "tester": "Emyrk",
+  "started_at": "2026-11-05T13:05:24Z",
+  "ended_at": "2026-11-05T13:22:45Z",
+  "capture_mode": "Retrospective from workspace-local Relay logs, Coder state, safe metrics, and explicit tester reply confirmation; exact UI reply times were not recorded. The prompts were not tagged with a preassigned run ID, so the operator correlated events privately by workspace ID and timestamp.",
+  "suite_revision": "d77409bceedcc4aba75c10d276d335919d810cf3",
+  "relay_revision": "23e85405e923e153baf2eb2ecab5576b3690c273",
+  "relay_binary_sha256": "9fa2150bfaa4598c1573e9e159d755a5cde1f45225b1b6e2cc65ef05804914ae",
+  "coderd_version": "v2.39.0-devel+dc8a406bca",
+  "organization": "steven",
+  "template": "agent-relay-qa-docker",
+  "template_version": "2267ce10-44a7-4cc4-a209-4fd7d088b60f",
+  "runner_image_digest": "sha256:f3c0b3ce3ed84a1233d11df56930cd1e26d4740c0162850ea40197a3243d3bb2",
+  "pool_config_hash": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
+  "scope": "Q01-a Claude and Q01-b Cursor only. Initial nonmember failures are preserved in the evidence; the passing attempts occurred after org membership was corrected. No other cases were run."
+}

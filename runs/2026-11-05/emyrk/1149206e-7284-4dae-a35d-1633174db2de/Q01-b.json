@@ -1,0 +1,14 @@
+{
+  "case_id": "Q01",
+  "variant_id": "Q01-b",
+  "status": "pass",
+  "observed_at": "2026-11-05T13:22:45Z",
+  "observations": [
+    "The first Cursor request was refused because its owner was not yet a steven member; the tester fixed membership and sent a new message to the QA pool. The initial failed claim is retained in evidence.",
+    "The new request was received and claimed at 13:06:48 UTC. Its QA workspace build started at 13:06:51 UTC and reached runner handoff 12.1 seconds later, with a connected, healthy agent and the expected cur:qa-cursor pool marker.",
+    "An INFO pending-request event was recorded for the new request. The tester explicitly confirmed a visible Cursor reply. The prompt was not tagged with a preassigned run ID; the operator correlated the build privately by workspace ID and timestamp. No transcript content or exact UI reply timestamp was collected.",
+    "The initial claim-failure counter stayed at one during the passing attempt, and the Relay reaped the finished Cursor workspace without selecting a Claude workspace."
+  ],
+  "evidence": ["evidence/Q01-b.md"],
+  "cleanup": "Relay queued deletion at 13:18:45 UTC after the session finished. At 13:22 UTC no steven QA workspaces remained; no manual deletion was needed."
+}

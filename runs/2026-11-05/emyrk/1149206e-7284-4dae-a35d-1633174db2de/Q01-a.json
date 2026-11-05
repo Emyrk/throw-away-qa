@@ -1,0 +1,14 @@
+{
+  "case_id": "Q01",
+  "variant_id": "Q01-a",
+  "status": "pass",
+  "observed_at": "2026-11-05T13:22:45Z",
+  "observations": [
+    "The first Claude attempt was nacked because the owner was not yet resolvable in steven; the tester fixed membership before fresh QA attempts. This failure is retained in evidence, not treated as a pass.",
+    "Fresh QA builds were created at 13:06:41 and 13:07:06 UTC and handed off to Claude runners 12.2 and 12.1 seconds later. At least one running workspace had a connected, healthy agent and the expected cc:qa-claude pool marker.",
+    "The tester explicitly confirmed a visible Claude reply. The prompt was not tagged with a preassigned run ID; the operator correlated the build privately by workspace ID and timestamp. No transcript content or exact UI reply timestamp was collected.",
+    "The Relay reaped the two finished Claude workspaces; neither was selected by the Cursor pool."
+  ],
+  "evidence": ["evidence/Q01-a.md"],
+  "cleanup": "Relay queued deletions at 13:07:30 and 13:18:14 UTC after the sessions finished. At 13:22 UTC no steven QA workspaces remained; no manual deletion was needed."
+}
