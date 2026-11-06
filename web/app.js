@@ -9,6 +9,7 @@ const STATUSES = {
 };
 const STATUS_ORDER = ["fail", "blocked", "not-in-build", "pass"];
 const REPOSITORY_BLOB = "https://github.com/Emyrk/throw-away-qa/blob/";
+const REPOSITORY_RAW = "https://raw.githubusercontent.com/Emyrk/throw-away-qa/";
 const TIMER_PREFIX = "test-atlas:timer:v1:";
 const state = { cases: [], runs: [], selectedCase: null, run: "", provider: "", pr: "", search: "", sourceRevision: "" };
 let timerViews = [];
@@ -16,6 +17,8 @@ let timerViews = [];
 const list = document.querySelector("#case-list");
 const detail = document.querySelector("#detail");
 const summary = document.querySelector("#summary");
+const recentList = document.querySelector("#recent-list");
+const screenshotList = document.querySelector("#screenshot-list");
 const announcement = document.querySelector("#announcement");
 
 function node(tag, className, text) {
@@ -132,27 +135,86 @@ function filteredCases() {
   });
 }
 
+function latestResults() {
+  const cases = new Map(state.cases.map((testCase) => [String(testCase.id), testCase]));
+  const latest = new Map();
+  for (const run of state.runs) {
+    for (const result of Array.isArray(run.results) ? run.results : []) {
+      const testCase = cases.get(String(result.case_id));
+      const variant = testCase?.variants?.find((item) => String(item.id) === String(result.variant_id));
+      if (!variant) continue;
+      const previous = latest.get(variant.id);
+      if (!previous || Date.parse(result.observed_at) > Date.parse(previous.result.observed_at)) {
+        latest.set(variant.id, { testCase, variant, result, run });
+      }
+    }
+  }
+  return [...latest.values()].sort((a, b) => a.variant.id.localeCompare(b.variant.id, undefined, { numeric: true }));
+}
+
 function renderSummary() {
   const scope = document.querySelector("#result-scope");
-  const run = chosenRuns()[0];
-  scope.textContent = state.run === ""
-    ? "Historical overview · results from different runs are not combined into a case verdict. Select a run to see its coverage."
-    : `Selected run: ${valueText(run?.path)} · a case passes only when every variant passes in this run. Check the manifest for the tested revision.`;
-  const counts = state.run === ""
-    ? { history: 0, unrecorded: 0 }
-    : { pass: 0, fail: 0, partial: 0, blocked: 0, "not-in-build": 0, unrecorded: 0 };
-  for (const testCase of state.cases) {
-    const status = state.run === ""
-      ? state.runs.some((item) => runResults(testCase, item).length) ? "history" : "unrecorded"
-      : runCoverage(testCase, run).status || "unrecorded";
-    counts[status]++;
-  }
+  scope.textContent = "Latest verdict per attempted variant. Earlier runs remain in the detailed history; results from different runs do not form a full-suite pass.";
+  const counts = { pass: 0, fail: 0, blocked: 0, "not-in-build": 0 };
+  for (const { result } of latestResults()) counts[result.status]++;
   summary.replaceChildren();
   for (const [status, count] of Object.entries(counts)) {
+    if (!count) continue;
     const tile = node("div", `summary-tile summary-${status}`);
-    tile.append(node("span", "summary-label", STATUSES[status] || { history: "Cases with history", partial: "Partial / unrun", unrecorded: "Unrun" }[status]), node("strong", "summary-number", count));
+    tile.append(node("span", "summary-label", STATUSES[status]), node("strong", "summary-number", count));
     summary.append(tile);
   }
+}
+
+function renderRecentResults() {
+  recentList.replaceChildren();
+  const latest = latestResults();
+  if (!latest.length) recentList.append(node("p", "muted", "No tests recorded yet."));
+  for (const { testCase, variant, result, run } of latest) {
+    const button = node("button", "recent-result");
+    button.type = "button";
+    button.append(node("span", "recent-title", `${variant.id} · ${variant.title}`), badge(result.status));
+    if (result.reason) button.append(node("span", "recent-note", result.reason.split(/(?<=\.)\s/)[0]));
+    button.addEventListener("click", () => {
+      state.run = String(state.runs.indexOf(run));
+      document.querySelector("#run").value = state.run;
+      state.selectedCase = testCase;
+      document.querySelector("#explorer").open = true;
+      render();
+      detail.scrollIntoView({ block: "start" });
+    });
+    recentList.append(button);
+  }
+}
+
+function renderScreenshots() {
+  screenshotList.replaceChildren();
+  let count = 0;
+  for (const run of state.runs) {
+    for (const result of Array.isArray(run.results) ? run.results : []) {
+      const images = (Array.isArray(result.evidence) ? result.evidence : []).filter((path) => typeof path === "string" && /\.png$/i.test(path));
+      for (const path of images) {
+        const imageURL = evidenceURL(run.path, path, REPOSITORY_RAW);
+        const sourceURL = evidenceURL(run.path, path);
+        if (!imageURL || !sourceURL) continue;
+        const figure = node("figure", "screenshot");
+        const link = node("a", "", "");
+        link.href = sourceURL;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        const image = node("img");
+        image.src = imageURL;
+        image.alt = `Screenshot evidence for ${result.variant_id}`;
+        image.loading = "lazy";
+        link.append(image);
+        figure.append(link, node("figcaption", "", `${result.variant_id} · ${STATUSES[result.status]}`));
+        screenshotList.append(figure);
+        count++;
+      }
+    }
+  }
+  if (!count) screenshotList.append(node("p", "muted", "No reviewed screenshots in the recorded results."));
+  else screenshotList.append(node("p", "screenshot-note", `Only ${count} recorded screenshot${count === 1 ? " is" : "s are"} available. Other results use timestamped text evidence.`));
 }
 
 function renderList() {
@@ -364,14 +426,14 @@ function renderVariants(testCase) {
   return section;
 }
 
-function evidenceURL(runPath, relativePath) {
+function evidenceURL(runPath, relativePath, base = REPOSITORY_BLOB) {
   if (!/^[a-f0-9]{40}$/i.test(state.sourceRevision) || typeof runPath !== "string" || typeof relativePath !== "string") return null;
   const runParts = runPath.split("/");
   const evidenceParts = relativePath.split("/");
   const safe = (part) => part && part !== "." && part !== ".." && !/[\\%\u0000-\u001f\u007f]/.test(part);
   if (runParts[0] !== "runs" || !runParts.every(safe) || !evidenceParts.every(safe)) return null;
   try {
-    return `${REPOSITORY_BLOB}${state.sourceRevision}/${[...runParts, ...evidenceParts].map(encodeURIComponent).join("/")}`;
+    return `${base}${state.sourceRevision}/${[...runParts, ...evidenceParts].map(encodeURIComponent).join("/")}`;
   } catch { return null; }
 }
 
@@ -483,7 +545,7 @@ function renderDetail() {
   detail.append(renderOverview(testCase), renderContext(testCase), renderVariants(testCase), renderResults(testCase));
 }
 
-function render() { renderSummary(); renderList(); renderDetail(); }
+function render() { renderSummary(); renderRecentResults(); renderList(); renderDetail(); }
 
 for (const [id, key] of [["#provider", "provider"], ["#pr", "pr"], ["#run", "run"]]) {
   document.querySelector(id).addEventListener("change", (event) => { state[key] = event.target.value; render(); });
@@ -511,6 +573,7 @@ async function load() {
     generated.textContent = formatDate(data.generated_at);
     document.querySelector("#run-count").textContent = String(state.runs.length);
     initFilters();
+    renderScreenshots();
     state.selectedCase = state.cases[0] || null;
     render();
   } catch (error) {
