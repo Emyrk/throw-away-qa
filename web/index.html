@@ -3,72 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="color-scheme" content="light" />
-    <title>Agent-Relay QA results</title>
+    <title>Agent-Relay QA</title>
+    <link rel="icon" href="data:," />
     <link rel="stylesheet" href="./style.css" />
     <script src="./app.js" defer></script>
   </head>
   <body>
-    <div class="page-shell">
-      <header class="site-header">
-        <div class="brand"><span class="brand-icon" aria-hidden="true">◈</span><span>TEST ATLAS <span class="brand-separator">/</span> QA</span></div>
-        <span class="read-only">● Read-only snapshot</span>
+    <main class="page">
+      <header>
+        <p class="eyebrow">Agent-Relay QA</p>
+        <h1>What we tested</h1>
       </header>
-
-      <main>
-        <section class="hero" aria-labelledby="page-title">
-          <div>
-            <p class="eyebrow">AGENT-RELAY <span aria-hidden="true">/</span> MANUAL QA</p>
-            <h1 id="page-title">Tests run.<br /><em>Evidence shown.</em></h1>
-            <p class="hero-description">Latest result for each attempted variant. A blocked or failed test is not a pass. <a href="https://github.com/Emyrk/throw-away-qa/blob/main/RESULTS.md">Read the concise report</a>.</p>
-          </div>
-          <div class="snapshot-card" aria-label="Snapshot information">
-            <span class="card-kicker">CURRENT SNAPSHOT</span>
-            <dl>
-              <div><dt>Source revision</dt><dd id="source-revision">Loading…</dd></div>
-              <div><dt>Generated</dt><dd id="generated-at">Loading…</dd></div>
-              <div><dt>Recorded runs</dt><dd id="run-count">-</dd></div>
-            </dl>
-          </div>
-        </section>
-
-        <p class="scope-note" id="result-scope" aria-live="polite">Loading result scope…</p>
-        <section class="summary" aria-label="Status summary" id="summary"></section>
-        <div id="load-error" class="load-error" role="alert" hidden></div>
-        <section class="recent-results" aria-labelledby="recent-heading">
-          <div class="section-heading"><p class="eyebrow">LATEST PER VARIANT</p><h2 id="recent-heading">What we tested</h2></div>
-          <div id="recent-list" class="recent-list"></div>
-        </section>
-        <section class="screenshots" aria-labelledby="screenshots-heading">
-          <div class="section-heading"><p class="eyebrow">REVIEWED EVIDENCE</p><h2 id="screenshots-heading">Screenshots</h2></div>
-          <div id="screenshot-list" class="screenshot-list"></div>
-        </section>
-        <details class="explorer" id="explorer">
-          <summary>Full cases, run history, and timelines</summary>
-          <div class="workspace">
-            <aside class="sidebar" aria-labelledby="case-heading">
-              <div class="sidebar-heading"><div><p class="eyebrow">THE LIBRARY</p><h2 id="case-heading">Test cases</h2></div><span id="case-count" class="count">-</span></div>
-              <div class="filters">
-                <label for="search">Search cases</label>
-                <input id="search" type="search" placeholder="ID, title, notes…" autocomplete="off" />
-                <div class="filter-row">
-                  <div><label for="provider">Provider</label><select id="provider"><option value="">All providers</option></select></div>
-                  <div><label for="pr">Pull request</label><select id="pr"><option value="">All PRs</option></select></div>
-                </div>
-                <label for="run">Result set</label>
-                <select id="run"><option value="">All runs</option></select>
-              </div>
-              <div id="case-list" class="case-list" aria-label="Filtered test cases"><p class="placeholder">Loading test cases…</p></div>
-            </aside>
-
-            <article class="detail" id="detail" aria-label="Selected test case">
-              <div class="detail-empty"><span aria-hidden="true">◈</span><h2>Select a case to begin</h2><p>Case details and recorded results will appear here.</p></div>
-            </article>
-          </div>
-        </details>
-        <p class="page-note">This read-only page uses the recorded run files. Timers in the detailed explorer stay in your browser.</p>
-      </main>
-    </div>
-    <div class="sr-only" id="announcement" role="status" aria-live="polite"></div>
+      <div id="results" class="results" aria-live="polite"></div>
+      <p id="error" role="alert" hidden></p>
+    </main>
   </body>
 </html>
