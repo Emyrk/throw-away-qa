@@ -22,8 +22,15 @@ dl { display: grid; gap: 8px; margin: 14px 0 0; }
 dl > div { display: grid; grid-template-columns: 85px 1fr; gap: 12px; }
 dt { color: #506970; font-size: 13px; font-weight: 700; }
 dd { margin: 0; font-size: 14px; line-height: 1.45; }
-.result a { display: block; width: fit-content; max-width: 100%; margin-top: 16px; }
-.result img { display: block; max-width: 100%; height: auto; border-radius: 5px; }
+.timeline { margin-top: 20px; }
+h3 { margin: 0 0 9px; font-size: 15px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 8px 10px; border-top: 1px solid #e4ebe8; text-align: left; vertical-align: top; }
+th { color: #506970; font-weight: 700; }
+th:first-child, td:first-child { width: 185px; overflow-wrap: anywhere; }
+.screenshots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 10px; margin-top: 16px; }
+.screenshots a { display: block; }
+.screenshots img { display: block; max-width: 100%; height: auto; border-radius: 5px; }
 #error { color: #a43d34; }
 :focus-visible { outline: 3px solid #287769; outline-offset: 3px; }
 
@@ -31,4 +38,5 @@ dd { margin: 0; font-size: 14px; line-height: 1.45; }
   .page { padding: 28px 14px 48px; }
   .result { padding: 16px; }
   dl > div { grid-template-columns: 1fr; gap: 2px; }
+  th:first-child, td:first-child { width: 112px; }
 }

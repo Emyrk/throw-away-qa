@@ -35,6 +35,38 @@ function renderResult(result, revision) {
   }
   card.append(details);
 
+  if (result.timeline?.length) {
+    const timeline = document.createElement("section");
+    timeline.className = "timeline";
+    const subtitle = document.createElement("h3");
+    subtitle.textContent = `Step by step (${result.timeline_date} UTC)`;
+    const table = document.createElement("table");
+    const header = document.createElement("thead");
+    const labels = document.createElement("tr");
+    for (const label of ["UTC", "Action or event"]) {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      labels.append(cell);
+    }
+    header.append(labels);
+    const body = document.createElement("tbody");
+    for (const item of result.timeline) {
+      const row = document.createElement("tr");
+      for (const value of [item.utc, item.event]) {
+        const cell = document.createElement("td");
+        cell.textContent = value;
+        row.append(cell);
+      }
+      body.append(row);
+    }
+    table.append(header, body);
+    timeline.append(subtitle, table);
+    card.append(timeline);
+  }
+
+  const gallery = document.createElement("div");
+  gallery.className = "screenshots";
   for (const path of result.images || []) {
     const url = imageURL(revision, path);
     if (!url) continue;
@@ -47,8 +79,9 @@ function renderResult(result, revision) {
     image.alt = `Screenshot of ${result.variant_id} outcome`;
     image.loading = "lazy";
     link.append(image);
-    card.append(link);
+    gallery.append(link);
   }
+  if (gallery.childElementCount) card.append(gallery);
   return card;
 }
 

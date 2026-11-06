@@ -20,6 +20,27 @@ def revision():
     return result.stdout.strip() if result.returncode == 0 else "uncommitted"
 
 
+def timeline_for_run(report, variant_id, run_id):
+    heading = f"## Timeline: {variant_id} ({run_id})"
+    if heading not in report:
+        return []
+    rows = []
+    in_table = False
+    for line in report.split(heading, 1)[1].splitlines():
+        if line.startswith("## "):
+            break
+        if line.startswith("| UTC | Action or event |"):
+            in_table = True
+        elif in_table and line.startswith("| ") and not line.startswith("| ---"):
+            cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
+            if len(cells) != 2 or any(not cell for cell in cells):
+                raise ValueError(f"invalid timeline row: {line}")
+            rows.append({"utc": cells[0], "event": cells[1]})
+    if not rows:
+        raise ValueError(f"timeline has no events: {heading}")
+    return rows
+
+
 def concise_results(report, cases, runs):
     variants = {variant["id"]: variant for case in cases for variant in case["variants"]}
     latest = {}
@@ -60,7 +81,13 @@ def concise_results(report, cases, runs):
                 "wanted": variant["summary"].split(". ", 1)[0].rstrip(".") + ".",
             }
         images = [str(Path(run["path"]) / path) for path in result["evidence"] if path.lower().endswith(".png")]
-        output.append({**summary, "status": result["status"], "images": images})
+        card = {**summary, "status": result["status"], "images": images}
+        timeline = timeline_for_run(report, variant_id, run.get("manifest", {}).get("run_id"))
+        if timeline:
+            card["timeline"] = timeline
+            card["timeline_date"] = run["manifest"]["started_at"][:10]
+        output.append(card)
+    output.sort(key=lambda card: not bool(card.get("timeline")))
     return output
 
 
