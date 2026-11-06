@@ -1,0 +1,15 @@
+QA Relay source-log excerpt, 2026-11-06 UTC. This is a field-restricted digest, not raw logs.
+Private raw source retained outside this public repository (10 JSON lines, SHA-256 4aeca62fbdcb2ffe0c924dea462033c8b04b6ce70734ef2fd45380fec25ea380).
+Session pseudonym s64ee155d24 correlates the two Claude workspace attempts; IDs, emails, credentials and raw records are withheld.
+
+UTC event time                       Session       Workspace    Redacted event
+2026-11-06T05:31:38.355505798Z     s64ee155d24  -            Claude QA spawn hint handled
+2026-11-06T05:31:39.050166748Z     s64ee155d24  240c180161   Workspace created
+2026-11-06T05:31:51.117192753Z     s64ee155d24  240c180161   Runner handoff
+2026-11-06T05:52:09.723428295Z     -            240c180161   Reaper observed done 0, session finished
+2026-11-06T05:52:10.242843745Z     -            240c180161   Natural deletion queued
+2026-11-06T05:55:53.330217198Z     s64ee155d24  -            Same-session Claude QA resume hint handled
+2026-11-06T05:55:53.935855519Z     s64ee155d24  039452974a   New workspace created
+2026-11-06T05:56:06.00498376Z      s64ee155d24  039452974a   Runner handoff
+2026-11-06T06:06:46.39896463Z      -            039452974a   Reaper observed done 0, session finished
+2026-11-06T06:06:46.544707869Z     -            039452974a   Natural deletion queued
