@@ -1,0 +1,26 @@
+{
+  "run_id": "0f906eca-0138-40c0-beee-9d53cd63603b",
+  "tester": "Emyrk",
+  "started_at": "2026-11-06T00:08:44.737116804Z",
+  "ended_at": "2026-11-06T00:10:20.050897032Z",
+  "suite_revision": "8739e213a36fec2190b53473e8a7e5b1332f412f",
+  "relay_revision": "23e85405e923e153baf2eb2ecab5576b3690c273",
+  "relay_binary_sha256": "9fa2150bfaa4598c1573e9e159d755a5cde1f45225b1b6e2cc65ef05804914ae",
+  "coderd_version": "v2.39.0-devel+4fe64af03b",
+  "organization": "steven",
+  "template": "agent-relay-qa-docker",
+  "template_version": "2267ce10-44a7-4cc4-a209-4fd7d088b60f",
+  "runner_image_digest": "not applicable: Q06-a/b parser-negative tests create no workspaces",
+  "baseline_pool_config_sha256": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
+  "scope": "Q06-a and Q06-b passed in separate short-lived local QA processes. Each used only one deliberately invalid parser pool, a dummy provider credential, a loopback-only provider API URL, and unique loopback listeners. Both exited code 1 with the expected exact diagnostic without reporting a started daemon; no test-only listener remained. The serving QA Relay config and binary were untouched, both baseline pools remained healthy, and no QA workspace was created. Private mode-0600 scratch configs/logs were checksum-verified and removed; no secret value or raw log is public.",
+  "events": [
+    {"at":"2026-11-06T00:08:44.737116804Z","recorded_at":"2026-11-06T00:08:44.737116804Z","source":"operator","kind":"run_started","time_basis":"observation","summary":"Started read-only preflight for isolated Q06-a/b invalid idle-setting checks. Serving QA Relay binary/source, both healthy pool gauges, original config hash, coderd/template revisions, zero QA workspaces and unused test-only loopback ports were verified."},
+    {"at":"2026-11-06T00:09:21.037884Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"isolated_configs_prepared","time_basis":"observation","summary":"Two private mode-0600 config overlays prepared from baseline: Claude obsolete release_idle_session_min=0 only, and Cursor unitless idle_release_timeout=10 only. Other provider disabled in each, provider API URLs loopback-only, dummy provider credential, unique ports 22114/22115."},
+    {"at":"2026-11-06T00:09:31.532939884Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"q06_a_process_started","time_basis":"observation","summary":"Started isolated Q06-a binary with the obsolete Claude key; private log recorded the process outcome."},
+    {"at":"2026-11-06T00:09:31.741287012Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"q06_a_rejected","time_basis":"observation","summary":"Q06-a exited code 1. Sanitized check confirmed 'release_idle_session_min is no longer supported; use idle_release_timeout (e.g. 1h or 0)' and startup failed; no daemon-started message or persistent test listener."},
+    {"at":"2026-11-06T00:09:48.187424651Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"q06_b_process_started","time_basis":"observation","summary":"Started isolated Q06-b binary with unitless positive Cursor idle_release_timeout=10."},
+    {"at":"2026-11-06T00:09:48.392779157Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"q06_b_rejected","time_basis":"observation","summary":"Q06-b exited code 1. Sanitized check confirmed 'idle_release_timeout must be a duration such as 1h or 0' and startup failed; no daemon-started message or persistent test listener."},
+    {"at":"2026-11-06T00:10:02.603844152Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"operator","kind":"baseline_unaffected","time_basis":"observation","summary":"Serving QA Relay config hash unchanged, both pool-health gauges one and ready/status listeners HTTP 200, no QA template workspace visible; test-only ports unbound."},
+    {"at":"2026-11-06T00:10:12.777338Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"isolated_scratch_removed","time_basis":"observation","summary":"Only the four own test configs/logs under the private Q06 scratch directory were removed after owner/mode/checksum verification. Serving QA config and secrets file remained in place."}
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "case_id": "Q06",
+  "variant_id": "Q06-a",
+  "status": "pass",
+  "observed_at": "2026-11-06T00:10:20.050897032Z",
+  "observations": [
+    "An isolated short-lived QA process used only a Claude parser pool with obsolete release_idle_session_min=0. The serving QA Relay and real provider queues were untouched; the test config used a dummy provider credential, loopback-only provider API URL and unique local listener ports.",
+    "The isolated process exited code 1 in under one second. Its private log contained 'release_idle_session_min is no longer supported; use idle_release_timeout (e.g. 1h or 0)' and a startup-failed indication, not the daemon-started message. No test-only listener persisted or QA workspace was created.",
+    "The original QA Relay remained ready with both QA pool-health gauges one. Private test config and log were removed after checksum and ownership review; no raw log or credential value is published."
+  ],
+  "events": [
+    {"at":"2026-11-06T00:09:21.037884Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"isolated_config_prepared","time_basis":"observation","step":1,"summary":"Private QA-only config contained obsolete Claude release_idle_session_min=0, disabled the Cursor provider, used a dummy provider credential and loopback-only endpoints."},
+    {"at":"2026-11-06T00:09:31.532939884Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"isolated_process_started","time_basis":"observation","step":1,"summary":"Launched the QA binary against the private invalid config, not the serving Relay config."},
+    {"at":"2026-11-06T00:09:31.741287012Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"obsolete_key_rejected","time_basis":"observation","step":1,"summary":"Exit code 1; sanitized check of the private log confirmed obsolete key and idle_release_timeout replacement named in the startup failure."},
+    {"at":"2026-11-06T00:10:02.603844152Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"operator","kind":"serving_relay_unaffected","time_basis":"observation","step":1,"summary":"Original QA Relay healthy with both pool gauges one, no QA workspace visible and no test-only listener bound."},
+    {"at":"2026-11-06T00:10:12.777338Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"scratch_removed","time_basis":"observation","summary":"Test config and private log removed from the owned isolated directory after verification."}
+  ],
+  "isolated_config_sha256": "5020ee78c49deaec1280d4c2a7ca56fcbff9b2414ce01969268e544a3eb15b88",
+  "private_log_sha256": "f0131350f83cbcb924a03447193175ef6a3afa2692140cdf8a8052219309fac3",
+  "evidence": [],
+  "cleanup": "The isolated process exited code 1 at 00:09:31 UTC; its private config/log were removed at 00:10:12 UTC. Test ports 22114/22115 were unbound, no QA workspaces existed and the serving Relay retained its healthy baseline configuration."
+}

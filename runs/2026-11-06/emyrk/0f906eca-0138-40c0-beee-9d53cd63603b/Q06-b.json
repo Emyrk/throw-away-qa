@@ -1,0 +1,22 @@
+{
+  "case_id": "Q06",
+  "variant_id": "Q06-b",
+  "status": "pass",
+  "observed_at": "2026-11-06T00:10:20.050897032Z",
+  "observations": [
+    "A separate isolated QA process used one Cursor parser pool with idle_release_timeout as the unitless JSON number 10. Claude was disabled in that test config; a dummy provider credential and loopback-only provider API URL prevented it from serving a real pool. The original QA Relay config was unchanged.",
+    "The test process exited code 1 in under one second. Its private log contained 'idle_release_timeout must be a duration such as 1h or 0' and a startup-failed indication, not the daemon-started message. No test-only listener persisted or QA workspace was created.",
+    "Both baseline pool-health gauges remained one. The private test config and log were removed after checksum and ownership review; no raw log or credential value is published."
+  ],
+  "events": [
+    {"at":"2026-11-06T00:09:21.037884Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"isolated_config_prepared","time_basis":"observation","step":1,"summary":"Private QA-only Cursor pool config contained unitless idle_release_timeout=10, disabled Claude, and used a dummy provider credential and unique loopback-only endpoints."},
+    {"at":"2026-11-06T00:09:48.187424651Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"isolated_process_started","time_basis":"observation","step":1,"summary":"Launched the QA binary against the private invalid Cursor config."},
+    {"at":"2026-11-06T00:09:48.392779157Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"unitless_timeout_rejected","time_basis":"observation","step":1,"summary":"Exit code 1; sanitized check of the private log confirmed idle_release_timeout must include a duration unit."},
+    {"at":"2026-11-06T00:10:02.603844152Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"operator","kind":"serving_relay_unaffected","time_basis":"observation","step":1,"summary":"Serving QA Relay retained both healthy pools, no QA workspace visible and test-only ports unbound."},
+    {"at":"2026-11-06T00:10:12.777338Z","recorded_at":"2026-11-06T00:10:20.050897032Z","source":"script","kind":"scratch_removed","time_basis":"observation","summary":"Private Cursor parser config and isolated log removed from the owned scratch directory."}
+  ],
+  "isolated_config_sha256": "3b3c8244ffb2128963d570b8e99bd703287c7e9d2fc6d519aad8fc7e85e39124",
+  "private_log_sha256": "84a5b2de91b56fc5d224c7e8bae2ea03639a8cd4a6cc128cfd95cf54ca63809f",
+  "evidence": [],
+  "cleanup": "The isolated process exited code 1 at 00:09:48 UTC; its private config/log were removed at 00:10:12 UTC. Test ports 22114/22115 were unbound, no QA workspaces existed and the serving Relay retained its healthy baseline configuration."
+}
