@@ -57,6 +57,9 @@ class ConciseResultsTests(unittest.TestCase):
         self.assertEqual("2026-11-06", card["timeline_date"])
         self.assertEqual([{"utc": "02:00:00", "event": "Sent follow-up; observed reply."}], card["timeline"])
 
+        self.runs[-1]["manifest"]["ended_at"] = "2026-11-07T00:01:00Z"
+        self.assertEqual("2026-11-06 to 2026-11-07", concise_results(report, self.cases, self.runs)[0]["timeline_date"])
+
         self.runs[-1]["manifest"]["run_id"] = "another-run"
         self.assertNotIn("timeline", concise_results(report, self.cases, self.runs)[0])
 

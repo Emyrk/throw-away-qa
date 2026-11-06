@@ -85,9 +85,15 @@ def concise_results(report, cases, runs):
         timeline = timeline_for_run(report, variant_id, run.get("manifest", {}).get("run_id"))
         if timeline:
             card["timeline"] = timeline
-            card["timeline_date"] = run["manifest"]["started_at"][:10]
+            started = run["manifest"]["started_at"][:10]
+            ended = run["manifest"].get("ended_at", started)[:10]
+            card["timeline_date"] = started if started == ended else f"{started} to {ended}"
         output.append(card)
-    output.sort(key=lambda card: not bool(card.get("timeline")))
+    output.sort(key=lambda card: (
+        not bool(card.get("timeline")),
+        -datetime.fromisoformat(latest[card["variant_id"]]["result"]["observed_at"].replace("Z", "+00:00")).timestamp()
+        if card.get("timeline") else 0,
+    ))
     return output
 
 
