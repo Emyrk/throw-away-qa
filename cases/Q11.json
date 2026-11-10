@@ -1,0 +1,84 @@
+{
+  "id": "Q11",
+  "title": "Claude redelivery during a slow start build",
+  "summary": "Checks whether a real Claude redelivery just before the first spawn deadline reuses the same QA workspace without a stale nack. The second work order's observed issue and expiry claims determine which deadline branch applies.",
+  "providers": ["claude_code"],
+  "priority": "P1",
+  "prs": [138, 147, 149],
+  "estimated_minutes": 25,
+  "prerequisites": [
+    "Use a pinned clean coder/agent-relay main build, not the older QA binary or an assumed dogfood release. Record source commit, build command, binary SHA-256 and executable path actually launched.",
+    "Confirm the steven QA-only Claude pool, the dedicated provisioner and a new QA template version with a cancellable eight-minute start-build delay. No unrelated QA workspaces or provider requests may be active.",
+    "Keep decoded debug work-order claims and raw Relay logs private. Publish only reviewed timestamps, attempt numbers and redacted claim comparisons; never publish work-order JWTs, provider session IDs or credentials.",
+    "Anthropic controls redelivery. Observe its actual attempt, iat and exp rather than assuming a new budget or asserting that a second work order arrives at exactly T+4:50."
+  ],
+  "config": {
+    "baseline": {"ref": "config/baseline.json"},
+    "overrides": {
+      "Q11-F1a": {
+        "claudeCodeRunnerPools[qa-claude].dispatch_deadline": "5m",
+        "claudeCodeRunnerPools[qa-claude].template_parameters.start_build_delay_seconds": "480",
+        "logLevel": "debug",
+        "reapStartupGrace": "15m"
+      }
+    }
+  },
+  "variants": [
+    {
+      "id": "Q11-F1a",
+      "title": "Redelivery before the first deadline",
+      "summary": "With one slow Claude QA build, checks whether a provider redelivery near T+4:50 takes the same workspace and supersedes the first watcher. A fresh or stale redelivery budget changes the expected branch; a missing redelivery blocks the live check.",
+      "steps": [
+        {
+          "action": "Verify the new template and latest-main Relay candidate. With a short QA-only build delay, confirm the provisioner can cancel a pending disposable start build; record status and cleanup before enabling the eight-minute delay.",
+          "wait_seconds": 0,
+          "poll_seconds": 3,
+          "timeout_seconds": 180,
+          "expected": "A short delayed QA build starts, cancellation settles promptly, and its disposable workspace is cleaned up. Both QA pools remain healthy.",
+          "evidence": "Template version, binary provenance, redacted provisioner event times, canceled build status and cleanup."
+        },
+        {
+          "action": "Start one benign Claude QA conversation. Capture attempt 0's verified iat and exp privately, its claim time and workspace/build 1, then poll the eight-minute build without manually triggering a second provider request.",
+          "wait_seconds": 0,
+          "poll_seconds": 3,
+          "timeout_seconds": 90,
+          "expected": "One QA workspace and a slow first start build are present. No runner is serving while the build waits.",
+          "evidence": "Redacted attempt 0 claim and workspace/build pseudonyms, issue/expiry times, build-delay marker and status polls."
+        },
+        {
+          "action": "Observe for an Anthropic redelivery near T+4:50. Compare attempt 1's verified iat and exp with attempt 0 in private debug logs; derive the actual second deadline as min(iat plus 5m, exp).",
+          "wait_seconds": 290,
+          "poll_seconds": 3,
+          "timeout_seconds": 360,
+          "expected": "If attempt 1 arrives with a fresh remaining budget, follow branch A. If its budget is already exhausted, record branch B without calling it an unconditional product failure. If no redelivery arrives, mark the live scenario blocked.",
+          "evidence": "Redacted attempt, issue/expiry comparisons, provider observation bounds and derived deadline; no raw work-order payload."
+        },
+        {
+          "action": "For a fresh-budget redelivery, observe workspace dedupe, cancellation and settlement of build 1, then start build 2 on the same workspace. Check that watcher 1 does not nack or delete the replacement.",
+          "wait_seconds": 0,
+          "poll_seconds": 3,
+          "timeout_seconds": 90,
+          "expected": "No second workspace; build 1 becomes canceled, build 2 waits again, and attempt 0 is superseded without a stale nack. Record race ordering if watcher 1 acquires the lock first.",
+          "evidence": "Redacted workspace/build correlation, cancellation and rebuild event times, both attempt-specific nack counts and applied outcomes."
+        },
+        {
+          "action": "Watch through the actual attempt 1 deadline and cleanup. If the second eight-minute build still runs, observe its terminal nack, cancellation and deletion; capture the provider outcome and restore the QA config.",
+          "wait_seconds": 600,
+          "poll_seconds": 3,
+          "timeout_seconds": 780,
+          "expected": "Only the current attempt can receive a terminal nack at its own deadline. The current build cancels and the QA workspace is deleted without leaving a stuck build; a completed build before deadline is a separate success observation.",
+          "evidence": "Sourced Relay/Coder/provider timeline, redacted debug excerpt, QA-only cleanup and visually reviewed screenshot crops."
+        }
+      ],
+      "cleanup": [
+        "Keep the new template's zero-delay default, remove the F1a pool delay and debug overlay, and verify both QA pool-health gauges and no leftover QA workspace.",
+        "Preserve private raw logs and original screenshots outside the public repository. Publish only sanitized evidence and the exact source commit and SHA-256 of the binary actually used."
+      ]
+    }
+  ],
+  "notes": [
+    "A second work order cannot be synthesized by sending another browser prompt. Provider iat/exp and actual redelivery time decide the live branch; do not pin branch A without evidence.",
+    "The long delay intentionally prevents either start build from finishing inside a five-minute spawn budget. A different faster second-build success path needs a separate case.",
+    "Do not run Cursor, change shared dogfood pools, publish raw debug payloads, or assume an HTTP nack was applied merely because a request was sent."
+  ]
+}
