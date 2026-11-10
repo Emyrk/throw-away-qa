@@ -159,8 +159,8 @@
           "wait_seconds": 60,
           "poll_seconds": 3,
           "timeout_seconds": 180,
-          "expected": "The current attempt gets one applied non-retryable nack; no build 2 and no second workspace are created. Build 1 has canceled_at and settles terminal canceled or failed before the workspace is deleted. No stale attempt-0 nack affects the newer claim.",
-          "evidence": "Attempt-specific applied nack outcomes, Coder cancellation and job times, same-session QA workspace count, absence of build 2 and redacted provider outcome."
+          "expected": "The current attempt gets one applied non-retryable nack; no second START build and no second workspace are created. Build 1 has canceled_at and settles terminal canceled or failed, then a DELETE build removes its workspace. No stale attempt-0 nack affects the newer claim.",
+          "evidence": "Attempt-specific applied nack outcomes, Coder cancellation and job times, same-session QA workspace count, absence of a second START build and redacted provider outcome."
         },
         {
           "action": "Restore the original mode-0600 QA config and unmodified clean-main launcher after cleanup. Verify both labeled QA pool-health gauges, readiness, active template default zero delay and no remaining QA template workspaces. Keep raw logs and full browser captures private.",
