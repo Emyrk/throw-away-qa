@@ -1,6 +1,6 @@
-# Agent-Relay QA, November 5-6, 2026
+# Agent-Relay QA, November 5-10, 2026
 
-Latest result per tested variant: **7 pass, 2 fail, 1 blocked**. The full run records hold timestamps and earlier attempts.
+Latest result per tested variant: **7 pass, 2 fail, 2 blocked**. The full run records hold timestamps and earlier attempts.
 
 | Test | Tried | Happened | Wanted |
 | --- | --- | --- | --- |
@@ -14,8 +14,9 @@ Latest result per tested variant: **7 pass, 2 fail, 1 blocked**. The full run re
 | Q06-b | Used a unitless Cursor timeout in an isolated process. | Startup rejected the invalid value. | Require a unit on positive timeouts. |
 | Q06-c | Sent a Claude follow-up before its idle release. | Claude replied and later released; Cursor was deferred. | Both providers reset idle timers and release later. |
 | Q06-d | Set Claude idle release to zero and sent a prompt. | Two runners failed to start; retention was untested. | Healthy runners remain through twelve idle minutes. |
+| Q11-F1a | Delayed a Claude QA start build for eight minutes under five- and two-minute spawn budgets. | Each request had only attempt 0; its deadline canceled the build and deleted the sole workspace. No redelivery was observed, so the race remains blocked. | A genuine redelivery reuses the workspace without a stale nack and observes its own deadline. |
 
-Only Q02-build, Q02-startup and Q06-c have reviewed screenshots. Q02-death used `/bin/false`, not SIGKILL. The Q06-d runner failure cause is unverified. [View the results](https://emyrk.github.io/throw-away-qa/).
+Only Q02-build, Q02-startup, Q06-c and Q11-F1a have reviewed screenshots. Q02-death used `/bin/false`, not SIGKILL. The Q06-d runner failure cause is unverified. [View the results](https://emyrk.github.io/throw-away-qa/).
 
 ## Timeline: Q05-a (e0912a27-7154-40a5-bf8e-44887730dfd7)
 
@@ -70,3 +71,22 @@ Times are UTC on 2026-11-06. Browser times are observation bounds or "by" times,
 | 01:23:38.771 / 01:23:49.523 / by 01:24:09.110 | Baseline retry built a third workspace; the same Claude session replied normally. |
 | 01:34:10.256 / 01:34:37.898 / by 01:35:12.802 | Baseline workspace stayed running, then exited cleanly and was deleted naturally. |
 | 01:35:21.951 / 01:36:14.033 | No QA workspaces remained and both pools were healthy. Zero-idle retention and Cursor untested; exit-2 cause unknown. |
+
+## Timeline: Q11-F1a (36d233dd-a375-430c-9efe-bcd7244062d3)
+
+Times are UTC on 2026-11-10. The specified 5m/8m trial and a separately labeled exploratory 2m/8m trial both lacked an observed Claude redelivery. Browser and workspace-listing times are observation bounds, not exact provider or deletion times. The full sourced event records and redacted evidence are in the run directory.
+
+| UTC | Action or event |
+| --- | --- |
+| 17:18:40 / 17:18:56.296587 / 17:18:57.143444 | The disposable 60s-delay preflight entered the delay, cancellation was accepted and its interrupted Terraform job finished failed with `canceled_at`. |
+| By 17:22:17.510059 / by 17:36:21.649548497 | Smoke workspace absent after authorized cleanup; tester later accepted terminal failed plus `canceled_at`. |
+| 17:36:58.68564575 / by 17:37:05.992031 | Clean main `43a5136` QA Relay started with private 5m/480s debug overlay; readiness 200 and both QA pool-health gauges one. |
+| 17:42:44.391480368 / 17:42:45.057004 / 17:42:52.510 | Verified attempt 0 had `iat=17:42:44Z`, `exp=17:47:44Z`; one QA workspace started build 1 and entered the 480s delay. |
+| 17:47:44.127244905 / 17:47:44.24196181 | Original deadline fired while build 1 ran; Relay logged an applied non-retryable attempt-0 nack. No attempt 1 observed. |
+| 17:47:44.345549 / 17:47:44.98416 / by 17:47:58.941968 | Build 1 received `canceled_at`, settled terminal failed, then the sole QA workspace was absent at a subsequent status poll. |
+| By 17:50:05.235 / by 17:54:53.639905 | Claude UI showed runner-start failure after one attempt; private verified-claims logs still showed no redelivery more than 11m after issue. |
+| By 17:55:38.163034 / 17:57:12.022298257 / 17:57:19.271 | Separate exploratory 2m dispatch overlay started; new attempt 0 had `iat=17:57:11Z`, `exp=17:59:11Z`, and its sole start build entered the 480s delay. |
+| 17:59:11.157899371 / 17:59:11.302383818 | Short deadline fired; Relay logged an applied non-retryable attempt-0 nack, with no attempt 1 observed. |
+| 17:59:11.402199 / 17:59:11.979845 / by 17:59:27.577878 | Build 1 received `canceled_at`, settled terminal failed, and the only exploratory QA workspace was absent at a later poll. |
+| By 18:00:40.334 / by 18:01:23.463495 | Claude UI showed failure after one attempt; no redelivery appeared in private verified-claims logs through the later check. |
+| 18:02:37.238282 / by 18:12:56.231 / by 18:14:56.398 | Original safe QA config restored byte-for-byte. Latest-main Relay remained ready with both QA pools healthy; a later Coder listing found zero `steven` QA template workspaces. |

@@ -1,8 +1,8 @@
 {
   "status": "QA_LOCAL_CONFIG",
-  "source_revision": "coder/agent-relay origin/main 23e85405e923e153baf2eb2ecab5576b3690c273",
+  "source_revision": "coder/agent-relay main snapshot 43a513659711f0a31bf1522a233c041df475bd4e",
   "apply_policy": "Use only for the dedicated QA relay in this workspace and confirm both provider queues are QA-only before starting. Never overwrite production deployment, queues, pools, templates or secrets. Restart the QA relay after one overlay at a time and record its redacted config hash.",
-  "unresolved": ["Check live Relay and both QA pool gauges before each run", "Record current template/module version before each run", "Verify status UI reader permissions for steven workspaces", "Run a provider-initiated QA request to verify Relay dispatch end to end"],
+  "unresolved": ["Check live Relay and both QA pool gauges before each run", "Record current template/module version before each run", "Verify status UI reader permissions for steven workspaces"],
   "secret_environment_variable_names_only": ["CODER_AGENT_RELAY_CODERD_SESSION_TOKEN", "QA_CLAUDE_POOL_SECRET", "QA_CURSOR_SERVICE_ACCOUNT_KEY"],
   "config": {
     "coderdURL": "https://dogfood.cdr.dev",
