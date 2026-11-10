@@ -1,13 +1,13 @@
 {
   "id": "Q11",
   "title": "Claude redelivery during a slow start build",
-  "summary": "Checks whether a real Claude redelivery just before the first spawn deadline reuses the same QA workspace without a stale nack. The second work order's observed issue and expiry claims determine which deadline branch applies.",
+  "summary": "Checks whether a real Claude redelivery around the first spawn lease reuses the same QA workspace without a stale nack. A separate instrumented variant holds the local first-attempt nack past the provider lease while preserving the advertised budget.",
   "providers": ["claude_code"],
   "priority": "P1",
   "prs": [138, 147, 149],
   "estimated_minutes": 25,
   "prerequisites": [
-    "Use a pinned clean coder/agent-relay main build, not the older QA binary or an assumed dogfood release. Record source commit, build command, binary SHA-256 and executable path actually launched.",
+    "Use clean coder/agent-relay main for F1a. For F1b, pin that same main commit plus an explicitly QA-only, uncommitted source mutation, and record its exact git diff and SHA-256 alongside the build command, binary hash and launched path.",
     "Confirm the steven QA-only Claude pool, the dedicated provisioner and a new QA template version with a cancellable eight-minute start-build delay. No unrelated QA workspaces or provider requests may be active.",
     "Keep decoded debug work-order claims and raw Relay logs private. Publish only reviewed timestamps, attempt numbers and redacted claim comparisons; never publish work-order JWTs, provider session IDs or credentials.",
     "Anthropic controls redelivery. Observe its actual attempt, iat and exp rather than assuming a new budget or asserting that a second work order arrives at exactly T+4:50."
@@ -20,6 +20,13 @@
         "claudeCodeRunnerPools[qa-claude].template_parameters.start_build_delay_seconds": "480",
         "logLevel": "debug",
         "reapStartupGrace": "15m"
+      },
+      "Q11-F1b": {
+        "claudeCodeRunnerPools[qa-claude].dispatch_deadline": "5m",
+        "claudeCodeRunnerPools[qa-claude].template_parameters.start_build_delay_seconds": "480",
+        "logLevel": "debug",
+        "reapStartupGrace": "15m",
+        "qa_source_mutation": "Only qa-claude attempt 0's local build watcher waits 60s past its original deadline; provider expected_spawn_seconds remains 300 and attempt 1 retains its own unmodified deadline. The exact patch is run evidence."
       }
     }
   },
@@ -73,6 +80,49 @@
       "cleanup": [
         "Keep the new template's zero-delay default, remove the F1a pool delay and debug overlay, and verify both QA pool-health gauges and no leftover QA workspace.",
         "Preserve private raw logs and original screenshots outside the public repository. Publish only sanitized evidence and the exact source commit and SHA-256 of the binary actually used."
+      ]
+    },
+    {
+      "id": "Q11-F1b",
+      "title": "Observe lease-expiry re-offer with a delayed local nack",
+      "summary": "Advertises a five-minute Claude spawn lease while an instrumented QA-only first watcher waits one extra minute. Checks whether a real provider re-offer arrives at lease expiry, reconciles the original workspace and supersedes its watcher; missing redelivery blocks this instrumented check.",
+      "steps": [
+        {
+          "action": "Confirm only the QA-only first-attempt watcher gains 60 seconds, while the advertised lease and subsequent attempt deadline remain unchanged. Pin the clean base commit, exact uncommitted source diff, binary SHA-256, restored baseline config and QA-only template version before applying the 5m/480s debug overlay.",
+          "wait_seconds": 0,
+          "poll_seconds": 3,
+          "timeout_seconds": 180,
+          "expected": "The QA Relay is healthy in both pools with expected_spawn_seconds 300 for Claude, one QA-only slow-build template, and no existing QA workspaces. No production source or pool is modified.",
+          "evidence": "Source patch, patch hash, binary and overlay hashes, template version, redacted readiness, pool and workspace counts."
+        },
+        {
+          "action": "Send one benign prompt in a new Claude conversation using the confirmed Steven-Testing environment. Observe signed attempt 0 iat/exp privately and its sole delayed build, then watch at least through its provider lease expiry without manually retrying or nacking.",
+          "wait_seconds": 300,
+          "poll_seconds": 3,
+          "timeout_seconds": 380,
+          "expected": "The first QA workspace has one unfinished 480-second start build; no runner registered or first-attempt nack occurred before the five-minute lease. A provider re-offer is possible but must be observed, not inferred.",
+          "evidence": "Bounded prompt observation, attempt-0 timestamps, build-delay marker, status polls and redacted first-attempt nack count."
+        },
+        {
+          "action": "Watch for an actual attempt 1 through the 60-second local observation grace and compare its verified iat/exp with attempt 0. If it has a usable budget, track cancellation of build 1 and build 2 on the same workspace across the old watcher deadline; otherwise report the actual branch or missing prerequisite.",
+          "wait_seconds": 60,
+          "poll_seconds": 3,
+          "timeout_seconds": 120,
+          "expected": "A fresh-budget re-offer uses one workspace and supersedes watcher 1 without its stale nack or deletion; a stale or absent re-offer is recorded honestly, not called a clean-main product failure. The second deadline is min(attempt-1 iat plus 5m, exp).",
+          "evidence": "Redacted attempt numbers and claim times, workspace/build pseudonyms, cancellation and supersession logs, per-attempt applied nack counts and observation bounds."
+        },
+        {
+          "action": "Observe the current build through its actual deadline and natural QA cleanup, then restore the safe config and original unmodified QA binary. Verify readiness, both pool-health gauges and no QA template workspaces. Keep raw payloads and full screenshots private.",
+          "wait_seconds": 600,
+          "poll_seconds": 3,
+          "timeout_seconds": 780,
+          "expected": "Only the current work order receives any terminal nack at its own deadline, canceled_at and terminal job status are recorded, and the sole QA workspace is absent. A failure to re-offer instead settles as a blocked redelivery assertion with cleanup fully verified.",
+          "evidence": "Sourced Relay/Coder/provider event timeline, sanitized log excerpt and image crops, exact source diff, restoration and cleanup checks."
+        }
+      ],
+      "cleanup": [
+        "Restore the original mode-0600 safe QA config and prior unmodified launcher binary after the test. Keep the published template's delay default 0 and leave no QA workspace.",
+        "Never publish private work-order payloads, credentials, raw logs or unreviewed screenshots. Record the binary actually run, its clean base commit and the exact uncommitted QA-only git diff."
       ]
     }
   ],
