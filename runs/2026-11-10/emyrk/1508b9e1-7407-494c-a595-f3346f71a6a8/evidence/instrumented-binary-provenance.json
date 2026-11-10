@@ -1,0 +1,18 @@
+{
+  "source_repository": "coder/agent-relay",
+  "clean_base_commit": "43a513659711f0a31bf1522a233c041df475bd4e",
+  "source_checkout": "instrumented uncommitted QA branch qa/observe-lease-redelivery",
+  "source_diff_file": "evidence/qa-source-git-diff.json",
+  "source_diff_command": "git diff --binary",
+  "source_diff_sha256": "9e4ee75beee7d9307d7f5cfa58d0b8422a3c078020d765b9e82c29734c7536b3",
+  "go_toolchain": "go1.26.10 linux/amd64",
+  "build_command": "make build VERSION=43a513659711f0a31bf1522a233c041df475bd4e-qa-lease-observation BINARY=/home/coder/.local/bin/agent-relay-qa-f1b",
+  "built_binary_sha256": "07fc442011747bacda6445c14823baacf3237bd0daeb04a2a3e85d6b7edc930d",
+  "launched_executable": "~/.local/bin/agent-relay-qa",
+  "launched_binary_sha256": "07fc442011747bacda6445c14823baacf3237bd0daeb04a2a3e85d6b7edc930d",
+  "first_poll_started_at": "2026-11-10T18:49:36.666882372Z",
+  "qa_template_version": "4a41e3e3-d1d0-4f9d-b70e-50328fbce004",
+  "trial_config_sha256": "471ccb7f47f2ab5953e067858f2f2765655ea383a0f8a7233ebdd0060356d8e0",
+  "baseline_config_sha256": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
+  "note": "This is an instrumented QA-only binary, not a clean-main build. The listed SHA-256 belongs to the executable actually launched for the live trial. Source mutation is losslessly embedded as a decoded git_diff string in the run evidence."
+}

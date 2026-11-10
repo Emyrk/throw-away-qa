@@ -1,0 +1,20 @@
+Q11-F1b field-restricted source events, 2026-11-10 UTC. This is not a raw log or a provider transcript.
+Private source: dedicated QA Relay log segment SHA-256 beae25df621c5ac3e9545487e04a70ddd91a92b34a8f43ef2fe9ac52bf9fdb6f. Private Coder build logs and status monitor remain outside the public repository.
+
+18:49:36.666882372  Instrumented qa-claude poll loop advertised expected_spawn_seconds=300. Only the first local QA watcher was extended 60 seconds; see exact git diff and instrumented binary provenance.
+18:51:11.869785080  Attempt 0 work-order claims were signature-verified privately: iat=18:51:11Z, exp=18:56:11Z. No raw JWT, provider session ID or personal claims are public.
+18:51:12.253807     Coder created build 1 on the sole QA workspace pseudonym 25b12b5ac9.
+18:51:18.938        Coder build log emitted the first 480-second QA start-build delay marker.
+18:56:13.540451     A private status poll completed after attempt-0 exp with build 1 still running; Relay had not nacked attempt 0.
+18:56:16.832435381  Anthropic re-offered the same session as attempt 1, with fresh iat=18:56:16Z and exp=19:01:16Z. The provider re-offer was observed, not synthesized by a second prompt.
+18:56:17.040342882  Relay logged reconciliation of the existing workspace for attempt 1; no second workspace was seen in the QA-scoped monitor.
+18:56:17.181202     Coder set canceled_at on build 1; its interrupted Terraform job completed terminal failed at 18:56:17.918334Z.
+18:56:20.249467     Coder created build 2 on the same QA workspace; its build parameters carried attempt=1 and start_build_delay_seconds=480.
+18:56:27.026        Coder build log emitted the second QA delay marker.
+18:57:28.809722     After first watcher's instrumented 18:57:11Z deadline, a status poll still saw build 2 running on the sole QA workspace. No attempt-0 nack or premature delete appeared in the private Relay log.
+19:01:16.081961783  Attempt-1 watcher logged its own fresh deadline while build 2 was still running.
+19:01:16.221130728  Relay logged an applied non-retryable nack for attempt 1. No attempt-0 nack was logged in the trial.
+19:01:16.279219     Coder marked build 2 canceled_at; it completed terminal failed at 19:01:16.781838Z.
+19:01:19.615726563  Relay queued natural deletion of the sole QA workspace. The all-workspaces poll completed at 19:01:31.633591Z with zero steven QA-template workspaces; exact deletion completion time is unknown.
+
+Browser observations, not exact provider event times: waiting with one failed attempt during 18:57:48.905 to 18:58:05.143Z; failed after two attempts during 19:02:02.686 to 19:02:10.824Z. The UI's first failed attempt is consistent with the lease expiry. The browser spinner remained visible; no separate inference is drawn from it.
