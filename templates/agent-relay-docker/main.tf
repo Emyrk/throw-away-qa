@@ -125,6 +125,21 @@ data "coder_parameter" "forced_failure_mode" {
   }
 }
 
+data "coder_parameter" "start_build_delay_seconds" {
+  name         = "start_build_delay_seconds"
+  display_name = "Start build delay in seconds"
+  description  = "Hold QA start builds pending before the runner container exists."
+  type         = "number"
+  default      = "0"
+  mutable      = true
+  order        = 6
+
+  validation {
+    min = 0
+    max = 480
+  }
+}
+
 resource "coder_agent" "main" {
   arch                    = "amd64"
   os                      = "linux"
@@ -189,8 +204,24 @@ resource "docker_image" "workspace" {
   keep_locally = true
 }
 
+resource "terraform_data" "start_build_delay" {
+  count = data.coder_workspace.me.start_count * (tonumber(data.coder_parameter.start_build_delay_seconds.value) > 0 ? 1 : 0)
+
+  # Each replacement start build must wait, even if an earlier apply left state.
+  triggers_replace = plantimestamp()
+
+  provisioner "local-exec" {
+    command = "echo 'QA start build delay started' >&2; exec sleep \"$DELAY_SECONDS\""
+    environment = {
+      DELAY_SECONDS = data.coder_parameter.start_build_delay_seconds.value
+    }
+  }
+}
+
 resource "docker_container" "workspace" {
   count = data.coder_workspace.me.start_count
+
+  depends_on = [terraform_data.start_build_delay]
 
   image    = docker_image.workspace.image_id
   name     = local.container_name
