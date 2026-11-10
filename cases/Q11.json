@@ -34,8 +34,8 @@
           "wait_seconds": 0,
           "poll_seconds": 3,
           "timeout_seconds": 180,
-          "expected": "A short delayed QA build starts, cancellation settles promptly, and its disposable workspace is cleaned up. Both QA pools remain healthy.",
-          "evidence": "Template version, binary provenance, redacted provisioner event times, canceled build status and cleanup."
+          "expected": "A short delayed QA build starts, the cancellation request is recorded and the job settles promptly with canceled_at set. A running Terraform apply may finish with job status failed; both QA pools remain healthy after cleanup.",
+          "evidence": "Template version, binary provenance, redacted provisioner event times, canceled_at, terminal job status and cleanup."
         },
         {
           "action": "Start one benign Claude QA conversation. Capture attempt 0's verified iat and exp privately, its claim time and workspace/build 1, then poll the eight-minute build without manually triggering a second provider request.",
@@ -58,7 +58,7 @@
           "wait_seconds": 0,
           "poll_seconds": 3,
           "timeout_seconds": 90,
-          "expected": "No second workspace; build 1 becomes canceled, build 2 waits again, and attempt 0 is superseded without a stale nack. Record race ordering if watcher 1 acquires the lock first.",
+          "expected": "No second workspace; build 1 stops and reaches terminal canceled or failed with canceled_at set, build 2 waits again, and attempt 0 is superseded without a stale nack. Record race ordering if watcher 1 acquires the lock first.",
           "evidence": "Redacted workspace/build correlation, cancellation and rebuild event times, both attempt-specific nack counts and applied outcomes."
         },
         {
@@ -66,7 +66,7 @@
           "wait_seconds": 600,
           "poll_seconds": 3,
           "timeout_seconds": 780,
-          "expected": "Only the current attempt can receive a terminal nack at its own deadline. The current build cancels and the QA workspace is deleted without leaving a stuck build; a completed build before deadline is a separate success observation.",
+          "expected": "Only the current attempt can receive a terminal nack at its own deadline. After cancellation, the current build reaches terminal canceled or failed with canceled_at set, then the QA workspace is deleted; a completed build before deadline is a separate success observation.",
           "evidence": "Sourced Relay/Coder/provider timeline, redacted debug excerpt, QA-only cleanup and visually reviewed screenshot crops."
         }
       ],
@@ -78,6 +78,7 @@
   ],
   "notes": [
     "A second work order cannot be synthesized by sending another browser prompt. Provider iat/exp and actual redelivery time decide the live branch; do not pin branch A without evidence.",
+    "A canceled running Terraform apply can be labeled failed by Coder even with canceled_at set. Judge cancellation by the recorded request, terminal job status, no duplicate workspace and no stale nack, not by the canceled label alone.",
     "The long delay intentionally prevents either start build from finishing inside a five-minute spawn budget. A different faster second-build success path needs a separate case.",
     "Do not run Cursor, change shared dogfood pools, publish raw debug payloads, or assume an HTTP nack was applied merely because a request was sent."
   ]
