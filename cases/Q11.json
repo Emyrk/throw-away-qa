@@ -1,13 +1,14 @@
 {
   "id": "Q11",
   "title": "Claude redelivery during a slow start build",
-  "summary": "Checks whether a real Claude redelivery around the first spawn lease reuses the same QA workspace without a stale nack. A separate instrumented variant holds the local first-attempt nack past the provider lease while preserving the advertised budget.",
+  "summary": "Checks Claude re-offers around the first spawn lease while a QA start build remains unfinished. Variants distinguish the prior rebuild behavior from a terminal current-attempt nack without a replacement build.",
   "providers": ["claude_code"],
   "priority": "P1",
   "prs": [138, 147, 149],
   "estimated_minutes": 25,
   "prerequisites": [
     "Use clean coder/agent-relay main for F1a. For F1b, pin that same main commit plus an explicitly QA-only, uncommitted source mutation, and record its exact git diff and SHA-256 alongside the build command, binary hash and launched path.",
+    "For F1c, pin the terminal-redelivery feature commit, apply only the reviewed QA first-watcher grace mutation in a separate worktree, and record both the feature commit and exact QA-only git diff with the binary actually launched. Restore the clean-main QA launcher after the run.",
     "Confirm the steven QA-only Claude pool, the dedicated provisioner and a new QA template version with a cancellable eight-minute start-build delay. No unrelated QA workspaces or provider requests may be active.",
     "Keep decoded debug work-order claims and raw Relay logs private. Publish only reviewed timestamps, attempt numbers and redacted claim comparisons; never publish work-order JWTs, provider session IDs or credentials.",
     "Anthropic controls redelivery. Observe its actual attempt, iat and exp rather than assuming a new budget or asserting that a second work order arrives at exactly T+4:50."
@@ -27,6 +28,13 @@
         "logLevel": "debug",
         "reapStartupGrace": "15m",
         "qa_source_mutation": "Only qa-claude attempt 0's local build watcher waits 60s past its original deadline; provider expected_spawn_seconds remains 300 and attempt 1 retains its own unmodified deadline. The exact patch is run evidence."
+      },
+      "Q11-F1c": {
+        "claudeCodeRunnerPools[qa-claude].dispatch_deadline": "5m",
+        "claudeCodeRunnerPools[qa-claude].template_parameters.start_build_delay_seconds": "480",
+        "logLevel": "debug",
+        "reapStartupGrace": "15m",
+        "qa_source_mutation": "Only qa-claude attempt 0's local watcher waits 60s beyond its verified expiry so a real re-offer can exercise the feature branch. The production branch still nacks the first attempt at its original deadline."
       }
     }
   },
@@ -124,12 +132,55 @@
         "Restore the original mode-0600 safe QA config and prior unmodified launcher binary after the test. Keep the published template's delay default 0 and leave no QA workspace.",
         "Never publish private work-order payloads, credentials, raw logs or unreviewed screenshots. Record the binary actually run, its clean base commit and the exact uncommitted QA-only git diff."
       ]
+    },
+    {
+      "id": "Q11-F1c",
+      "title": "Terminally nack a re-offer during an unfinished build",
+      "summary": "Exercises the terminal-redelivery feature branch with a five-minute Claude lease and QA-only first-watcher grace. A genuine re-offer while the first start build still runs must receive a non-retryable current-attempt nack, with no second start build and natural QA cleanup.",
+      "steps": [
+        {
+          "action": "Pin the feature commit plus exact QA-only source diff, tested binary hash, active QA template and original safe config. Verify qa-claude advertises a 300-second lease with a 480-second delayed start build, and both QA pools are healthy with zero QA workspaces before sending a prompt.",
+          "wait_seconds": 0,
+          "poll_seconds": 3,
+          "timeout_seconds": 180,
+          "expected": "Only the first qa-claude watcher gains one minute in this instrumented binary; the production branch and Cursor pool remain unchanged. The dedicated QA Relay is ready and the provisioner is idle.",
+          "evidence": "Feature commit, exact git diff and hash, launched binary and overlay hashes, provisioner and template version, pool health and QA workspace count."
+        },
+        {
+          "action": "Send one benign prompt in a new Claude conversation with the tester-confirmed Steven-Testing environment. Observe attempt 0's signed iat/exp, one workspace/build and the 480-second delay marker, then wait across the five-minute provider lease without manual retry.",
+          "wait_seconds": 300,
+          "poll_seconds": 3,
+          "timeout_seconds": 380,
+          "expected": "One QA workspace holds one pending or starting build and no runner is serving. No attempt-0 local terminal nack happens before the provider has a chance to re-offer at the lease boundary.",
+          "evidence": "Bounded prompt observation, private verified-claims times, pseudonymous workspace/build correlation, delay marker and status samples."
+        },
+        {
+          "action": "If Anthropic re-offers, verify the new signed attempt and check its terminal nack applied before any second start build. Watch cancellation, terminal job status and deletion of the sole QA workspace; if no re-offer occurs, mark the re-offer-dependent assertion blocked rather than passed.",
+          "wait_seconds": 60,
+          "poll_seconds": 3,
+          "timeout_seconds": 180,
+          "expected": "The current attempt gets one applied non-retryable nack; no build 2 and no second workspace are created. Build 1 has canceled_at and settles terminal canceled or failed before the workspace is deleted. No stale attempt-0 nack affects the newer claim.",
+          "evidence": "Attempt-specific applied nack outcomes, Coder cancellation and job times, same-session QA workspace count, absence of build 2 and redacted provider outcome."
+        },
+        {
+          "action": "Restore the original mode-0600 QA config and unmodified clean-main launcher after cleanup. Verify both labeled QA pool-health gauges, readiness, active template default zero delay and no remaining QA template workspaces. Keep raw logs and full browser captures private.",
+          "wait_seconds": 0,
+          "poll_seconds": 3,
+          "timeout_seconds": 180,
+          "expected": "Dedicated QA Relay returns to safe baseline with both pools healthy and zero QA template workspaces. Only the separately instrumented feature branch was used for the trial; no Cursor prompt or production deployment change occurred.",
+          "evidence": "Sourced UTC event timeline, redacted log excerpt and polls, reviewed screenshots if exportable, exact source diff and binary provenance, final cleanup checks."
+        }
+      ],
+      "cleanup": [
+        "Restore the original QA config and clean-main launcher byte-for-byte, and keep the QA template's delay default zero.",
+        "Preserve raw work-order payloads, full logs and original screenshots privately. Publish only redacted evidence and the exact feature commit, QA-only diff and SHA-256 of the executable actually launched."
+      ]
     }
   ],
   "notes": [
     "A second work order cannot be synthesized by sending another browser prompt. Provider iat/exp and actual redelivery time decide the live branch; do not pin branch A without evidence.",
     "A canceled running Terraform apply can be labeled failed by Coder even with canceled_at set. Judge cancellation by the recorded request, terminal job status, no duplicate workspace and no stale nack, not by the canceled label alone.",
-    "The long delay intentionally prevents either start build from finishing inside a five-minute spawn budget. A different faster second-build success path needs a separate case.",
+    "The long delay prevents a start build from finishing inside a five-minute spawn budget. A faster success path needs a separate case.",
     "Do not run Cursor, change shared dogfood pools, publish raw debug payloads, or assume an HTTP nack was applied merely because a request was sent."
   ]
 }
