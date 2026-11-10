@@ -1,6 +1,6 @@
 # Agent-Relay QA, November 5-10, 2026
 
-Latest result per tested variant: **8 pass, 2 fail, 2 blocked**. The full run records hold timestamps and earlier attempts.
+Latest result per tested variant: **9 pass, 2 fail, 2 blocked**. The full run records hold timestamps and earlier attempts.
 
 | Test | Tried | Happened | Wanted |
 | --- | --- | --- | --- |
@@ -16,8 +16,9 @@ Latest result per tested variant: **8 pass, 2 fail, 2 blocked**. The full run re
 | Q06-d | Set Claude idle release to zero and sent a prompt. | Two runners failed to start; retention was untested. | Healthy runners remain through twelve idle minutes. |
 | Q11-F1a | Delayed a Claude QA start build for eight minutes under five- and two-minute spawn budgets. | Each request had only attempt 0; its deadline canceled the build and deleted the sole workspace. No redelivery was observed, so the race remains blocked. | A genuine redelivery reuses the workspace without a stale nack and observes its own deadline. |
 | Q11-F1b | Instrumented only the first QA watcher with one extra minute while advertising a five-minute Claude lease. | Anthropic re-offered attempt 1 after lease expiry; Relay rebuilt the same workspace without an old-attempt nack, then timed out attempt 1 at its fresh deadline. | A real re-offer supersedes the first watcher, retains one workspace and gets its own full deadline. |
+| Q11-F1c | Ran the terminal-redelivery feature commit with QA-only first-watcher grace and one eight-minute Claude start delay. | A genuine attempt 1 arrived after the five-minute lease, received an applied non-retryable nack, and the sole START build was canceled and deleted without a second START. | Terminally fail a re-offer that finds an unfinished START, then clean up one workspace; leave the production first-attempt deadline unchanged. |
 
-Only Q02-build, Q02-startup, Q06-c and Q11-F1a have reviewed screenshots. Q02-death used `/bin/false`, not SIGKILL. The Q06-d runner failure cause is unverified. [View the results](https://emyrk.github.io/throw-away-qa/).
+Public Git includes reviewed screenshots only for Q02-build, Q02-startup, Q06-c and Q11-F1a. Q02-death used `/bin/false`, not SIGKILL. The Q06-d runner failure cause is unverified. [View the results](https://emyrk.github.io/throw-away-qa/).
 
 ## Timeline: Q05-a (e0912a27-7154-40a5-bf8e-44887730dfd7)
 
@@ -110,3 +111,19 @@ Times are UTC on 2026-11-10. This is an **instrumented QA-only** run, not a clea
 | 19:01:16.279219 / 19:01:16.781838 / 19:01:19.615726563 | Build 2 received `canceled_at`, settled terminal failed, and Relay queued the sole workspace for natural deletion. |
 | By 19:01:31.633591 / by 19:02:10.824 | Zero QA template workspaces at the next poll; Claude UI showed Failed after 2 attempts. Exact deletion and browser failure instants are unknown. |
 | 19:02:46.908289 / by 19:04:18.159318 | Restored the original safe config and unmodified clean-main QA binary byte-for-byte. Relay ready, both QA pool-health gauges one, zero `steven` QA template workspaces. |
+
+## Timeline: Q11-F1c (cf0050f9-e3d2-4daa-a33c-a1900c744228)
+
+Times are UTC on 2026-11-10. This pass covers feature commit `a472aacc603230c625ab714418fc005d77324dcc` **plus QA-only first-watcher grace**, not a byte-identical production binary. [The exact test-only `git diff --binary` is losslessly stored as a JSON `git_diff` field](runs/2026-11-10/emyrk/cf0050f9-e3d2-4daa-a33c-a1900c744228/evidence/qa-source-git-diff.json), SHA-256 `11b700a919e9b130c6ffb94f7f2f61ec430742a540762977dbbd2bd98a5f8a1b`. The launched executable's SHA-256 was `4c295a1aa66329a393adbfacb3686213cb87cb75a4441627c85461195d46582b`. Redacted logs, 143 status polls and binary provenance are in the run. Browser times are observation bounds; private screenshots are attached to the tester chat, not published here.
+
+| UTC | Action or event |
+| --- | --- |
+| By 21:53:54.704980077 / by 21:54:13.454850 | Instrumented feature-branch Relay advertised `expected_spawn_seconds=300` with only attempt 0's local watcher extended 60s; both QA pools healthy, zero QA workspaces. |
+| 21:54:51.562 to 21:54:58.841 / 21:54:59.898046590 | Sent one benign prompt in new Steven-Testing conversation within the observed Enter bounds. Verified attempt 0 had `iat=21:54:59Z`, `exp=21:59:59Z`. |
+| 21:55:00.272024 / 21:55:07.297 | Coder created START build 1 on one QA workspace and entered the 480s delay before any runner. |
+| By 22:00:03.961102 / 22:00:04.885238640 | Original START still ran after attempt-0 expiry, without a local nack. Anthropic re-offered the same session as attempt 1 with fresh `iat=22:00:04Z`, `exp=22:05:04Z`. |
+| 22:00:05.079208970 / 22:00:05.228257528 | Feature branch detected the unfinished START and logged an applied non-retryable nack of current attempt 1. No attempt-0 nack or second START build occurred. |
+| 22:00:05.323950 / 22:00:05.796797 | Coder marked START build 1 `canceled_at`, then its interrupted Terraform job settled terminal failed. |
+| 22:00:08.560537 / 22:00:21.348458 / by 22:00:25.211489 | Build 2 was **DELETE**, not another START; it succeeded and the sole QA workspace was absent at the later poll. |
+| By 22:00:56.911 | Claude UI showed Failed after 2 attempts. The exact failure transition is unknown; private screenshot was reviewed. |
+| 22:01:52.747996 / 22:02:19 / by 22:02:56.547046 | Original safe config and clean-main QA launcher restored byte-for-byte. QA case wording corrected to distinguish DELETE from a second START; both pools healthy and zero QA workspaces at final check. |
