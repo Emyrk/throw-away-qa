@@ -1,0 +1,21 @@
+{
+  "source_repository": "coder/agent-relay",
+  "feature_commit": "a472aacc603230c625ab714418fc005d77324dcc",
+  "feature_branch": "feat/terminal-claude-redelivery",
+  "qa_source_checkout": "/home/coder/agent-relay-terminal-qa",
+  "qa_source_branch": "qa/claude-terminal-observation",
+  "qa_source_git_diff_evidence": "evidence/qa-source-git-diff.json",
+  "qa_source_diff_command": "git diff --binary",
+  "qa_source_diff_sha256": "11b700a919e9b130c6ffb94f7f2f61ec430742a540762977dbbd2bd98a5f8a1b",
+  "go_toolchain": "go1.26.10 linux/amd64",
+  "build_command": "make build VERSION=a472aacc603230c625ab714418fc005d77324dcc-qa-first-grace BINARY=/home/coder/.local/bin/agent-relay-qa-f1c",
+  "built_binary_sha256": "4c295a1aa66329a393adbfacb3686213cb87cb75a4441627c85461195d46582b",
+  "launched_executable": "~/.local/bin/agent-relay-qa",
+  "launched_binary_sha256": "4c295a1aa66329a393adbfacb3686213cb87cb75a4441627c85461195d46582b",
+  "first_claude_poll_at": "2026-11-10T21:53:54.704980077Z",
+  "advertised_expected_spawn_seconds": 300,
+  "active_qa_template_version": "4a41e3e3-d1d0-4f9d-b70e-50328fbce004",
+  "trial_config_sha256": "471ccb7f47f2ab5953e067858f2f2765655ea383a0f8a7233ebdd0060356d8e0",
+  "baseline_config_sha256": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
+  "scope": "The feature commit is production-intended. Only the uncommitted diff from that commit adds a QA-only one-minute grace for attempt 0. Neither code path was deployed to production or shared dogfood."
+}

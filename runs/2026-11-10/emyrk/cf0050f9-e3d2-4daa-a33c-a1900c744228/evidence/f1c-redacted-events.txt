@@ -1,0 +1,16 @@
+Q11-F1c field-restricted source events, 2026-11-10 UTC. This is not a raw log or a provider transcript.
+Private source: dedicated QA Relay log segment SHA-256 dc956de3478e3fae8a9d6aebe315a158f4c47f49c7d8885a68d48720ccdac1d2. Private Coder build logs, signed work orders and full status monitor remain outside the public repository.
+
+21:53:54.704980077  Instrumented feature-branch qa-claude poll loop advertised expected_spawn_seconds=300. Only attempt 0's local watcher gained a QA-only 60s grace, as recorded in the lossless git diff.
+21:54:59.898046590  Private signature-verified attempt 0 carried iat=21:54:59Z and exp=21:59:59Z. The candidate binary's first-watcher deadline was 22:00:59Z; the JWT expiry was not changed.
+21:55:00.272024     Coder created START build 1 on sole steven QA workspace pseudonym 95721dc868.
+21:55:07.297        Private Coder build log emitted the 480-second QA start delay marker.
+22:00:03.961102     A status poll completed after attempt-0 expiry with START build 1 still running, no runner online, and no attempt-0 nack logged.
+22:00:04.885238640  Anthropic re-offered the same session as signed attempt 1, with fresh iat=22:00:04Z and exp=22:05:04Z. No second prompt or manual retry was sent.
+22:00:05.079208970  Relay recognized the unfinished predecessor and chose terminal current-attempt failure rather than a second START build.
+22:00:05.228257528  Relay logged one applied non-retryable nack for attempt 1. No attempt-0 nack appeared in the private trial log.
+22:00:05.323950     Coder marked START build 1 canceled_at; the interrupted Terraform job completed terminal failed at 22:00:05.796797Z.
+22:00:08.560537     Coder created build 2 solely to DELETE the existing QA workspace; Relay logged the delete queue at 22:00:08.612848529Z. No second START build was created.
+22:00:21.348458     DELETE build completed succeeded. The QA-scoped workspace listing was empty by the poll completed at 22:00:25.211489Z; exact row removal time unknown.
+
+Browser observation, not an exact provider failure time: the new Claude conversation showed Failed after 2 attempts by the screenshot bracket 22:00:48.731 to 22:00:56.911Z. The first lease expired without a local nack, and Relay terminally nacked the re-offered second attempt. A loading indicator persisted; no separate defect is inferred. Screenshots are attached only to the private tester chat.
