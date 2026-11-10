@@ -1,0 +1,20 @@
+{
+  "relay_repository": "coder/agent-relay",
+  "source_commit": "43a513659711f0a31bf1522a233c041df475bd4e",
+  "source_checkout_clean_at_build": true,
+  "build_command": "make build VERSION=43a513659711f0a31bf1522a233c041df475bd4e BINARY=/home/coder/.local/bin/agent-relay-qa.f1a-main-43a5136",
+  "go_toolchain": "go1.26.10 linux/amd64",
+  "built_binary_sha256": "ff2dc8de8dc77b23b1490d82ea0867eba28f9c1950fb19c064ebff00d8095ee7",
+  "launched_executable": "~/.local/bin/agent-relay-qa",
+  "launched_binary_sha256": "ff2dc8de8dc77b23b1490d82ea0867eba28f9c1950fb19c064ebff00d8095ee7",
+  "launcher": "AGENT_RELAY_QA_POOLS_CONFIRMED=yes sh scripts/run-relay.sh",
+  "first_startup_log_at": "2026-11-10T17:36:58.68564575Z",
+  "template_source_commit": "db383fe1e85b72126bc2759eec91ed3d5af9aa5e",
+  "active_template_version_at_test": "4a41e3e3-d1d0-4f9d-b70e-50328fbce004",
+  "suite_revision_at_provider_test": "39ed8436617f84885cda6bb77ffa76f5e362cd77",
+  "coderd_version": "v2.39.1-devel+66dca90c91",
+  "five_minute_overlay_sha256": "988e1b278c46ab5e50010fc1027589322af982ddba4714b91e5011c6a0d712f8",
+  "two_minute_overlay_sha256": "bbfdd83462ffcd7005316fcaeba7a3f8a1d3c84bf0f9952c3eeebd32c3b16ae8",
+  "restored_config_sha256": "f9c55a8924ddc71b09b6d08d3a77264060ee5fc5b61337260197090edcb53cf7",
+  "notes": "The binary SHA-256 is for the executable actually launched in both provider trials. No executable, credential or raw work order is committed to this public repository."
+}

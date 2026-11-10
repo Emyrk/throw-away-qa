@@ -1,0 +1,24 @@
+F1a source-log digest, 2026-11-10 UTC. These are selected, field-restricted events, not raw logs.
+Private sources kept outside this public repository: five-minute Relay log SHA-256 c560d4c40b294c3f2725a5c02d19d1916fd93ad7a1507c5d45a131d3e02b0618; two-minute Relay log SHA-256 87a89a4a5fe59f41f0c932b923e306fa837c42fc7ca30864a9d06e7016ac337a. Coder build-log and status-poll sources are also private. No work-order JWT, email, account identity or raw provider/session ID is copied here.
+
+Five-minute budget, eight-minute configured build delay:
+2026-11-10T17:42:44.391480368Z  Signed work-order payload logged privately, attempt 0; iat 17:42:44Z, exp 17:47:44Z.
+2026-11-10T17:42:47.191414035Z  One QA workspace created, pseudonym ea498c7272.
+2026-11-10T17:42:52.510Z        Coder build log emitted the QA start-build delay marker.
+2026-11-10T17:47:44.127244905Z  Build watcher observed the spawn deadline with build 1 still running.
+2026-11-10T17:47:44.24196181Z   Relay logged an applied non-retryable nack for attempt 0; no attempt 1 was observed.
+2026-11-10T17:47:44.345549Z     Coder marked build 1 canceled_at; Relay logged its cancel request at 17:47:44.370236501Z.
+2026-11-10T17:47:44.984160Z     Interrupted Terraform job finished with status failed, not canceled.
+2026-11-10T17:47:48.214685026Z  Relay queued deletion; QA workspace absent by the 17:47:58.941968Z status poll.
+
+Two-minute exploratory budget, same eight-minute configured delay:
+2026-11-10T17:57:12.022298257Z  Signed work-order payload logged privately, attempt 0; iat 17:57:11Z, exp 17:59:11Z.
+2026-11-10T17:57:13.750416042Z  One new QA workspace created, pseudonym cc4f2f03a3.
+2026-11-10T17:57:19.271Z        Coder build log emitted the QA start-build delay marker.
+2026-11-10T17:59:11.157899371Z  Build watcher observed the spawn deadline with build 1 still running.
+2026-11-10T17:59:11.302383818Z  Relay logged an applied non-retryable nack for attempt 0; no attempt 1 was observed.
+2026-11-10T17:59:11.402199Z     Coder marked build 1 canceled_at; Relay logged its cancel request at 17:59:11.432350506Z.
+2026-11-10T17:59:11.979845Z     Interrupted Terraform job finished with status failed.
+2026-11-10T17:59:14.807972994Z  Relay queued deletion; QA workspace absent by the 17:59:27.577878Z status poll.
+
+No second work-order payload for either session appeared through the last private log observations at 17:54:29Z and 18:01:23Z, respectively. These runs therefore do not exercise a redelivered attempt's iat/exp, workspace dedupe or stale-watcher behavior. Browser failure banners were seen later than the nacks; their exact occurrence times are unknown.
